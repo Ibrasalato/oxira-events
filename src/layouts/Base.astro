@@ -1,0 +1,47 @@
+---
+import '@fontsource-variable/alexandria';
+import '../styles/global.css';
+import { t, type Lang } from '../i18n/content';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const c = t[lang];
+const site = 'https://events.oxira.sa';
+const path = lang === 'ar' ? '/' : '/en/';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+<!doctype html>
+<html lang={c.htmlLang} dir={c.dir}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{c.title}</title>
+    <meta name="description" content={c.description} />
+    <link rel="canonical" href={`${site}${path}`} />
+    <link rel="alternate" hreflang="ar" href={`${site}/`} />
+    <link rel="alternate" hreflang="en" href={`${site}/en/`} />
+    <link rel="alternate" hreflang="x-default" href={`${site}/`} />
+    <meta name="theme-color" content="#0A253E" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={c.title} />
+    <meta property="og:description" content={c.description} />
+    <meta property="og:url" content={`${site}${path}`} />
+    <meta property="og:image" content={`${site}/img/work/8-l.webp`} />
+    <meta property="og:locale" content={lang === 'ar' ? 'ar_SA' : 'en_US'} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: 'Oxira Events',
+      url: site,
+      email: 'info@oxira.sa',
+      telephone: '+966565670776',
+      parentOrganization: { '@type': 'Organization', name: 'Oxira', url: 'https://oxira.sa' },
+      areaServed: 'SA',
+    })} />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
