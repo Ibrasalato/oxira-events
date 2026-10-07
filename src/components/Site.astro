@@ -1,6 +1,9 @@
 ---
 import Logo from './Logo.astro';
 import LangPicker from './LangPicker.astro';
+import Calendar from './Calendar.astro';
+import Planner from './Planner.astro';
+import { x } from '../i18n/extra';
 import { t, WORK, AISLE, CONTACT, N8N, langPath, type Lang } from '../i18n/content';
 
 interface Props { lang: Lang }
@@ -124,6 +127,8 @@ const FIRST = 12;
     </div>
   </section>
 
+  <Calendar lang={lang} />
+
   <section id="about" class="about" aria-labelledby="about-title">
     <div class="wrap about-grid">
       <figure class="about-photo cut">
@@ -146,6 +151,8 @@ const FIRST = 12;
       </div>
     </div>
   </section>
+
+  <Planner lang={lang} />
 
   <section id="contact" class="contact" aria-labelledby="contact-title">
     <div class="wrap contact-grid">
@@ -196,6 +203,7 @@ const FIRST = 12;
     <Logo tone="light" />
     <p>{c.footer.tag}</p>
     <p><bdi dir="ltr">{CONTACT.email}</bdi> &nbsp;|&nbsp; <bdi dir="ltr">{CONTACT.phone}</bdi></p>
+    <a class="foot-link" href={`${base}${langPath(lang)}privacy/`}>{x[lang].privacy.link}</a>
     <p class="rights">© {new Date().getFullYear()} {c.footer.rights}</p>
   </div>
 </footer>

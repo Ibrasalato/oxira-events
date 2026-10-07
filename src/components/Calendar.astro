@@ -1,0 +1,99 @@
+---
+import events from '../i18n/events.json';
+import { x } from '../i18n/extra';
+import type { Lang } from '../i18n/content';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const e = x[lang].cal;
+const locale = { ar: 'ar-u-ca-gregory-nu-latn', en: 'en-GB', de: 'de-DE', fr: 'fr-FR', ru: 'ru-RU' }[lang];
+const month = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' });
+const monthShort = new Intl.DateTimeFormat(locale, { month: 'short', timeZone: 'UTC' });
+const d = (s: string) => new Date(s + 'T00:00:00Z');
+const range = (a: string, b: string) => {
+  const A = d(a), B = d(b);
+  const same = A.getUTCMonth() === B.getUTCMonth();
+  return same ? `${A.getUTCDate()}–${B.getUTCDate()}` : `${A.getUTCDate()} ${monthShort.format(A)} – ${B.getUTCDate()} ${monthShort.format(B)}`;
+};
+const label = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? ev.name_ar : ev.name);
+const FIRST = 8;
+---
+<section id="calendar" class="cal" aria-labelledby="cal-title">
+  <div class="wrap">
+    <div class="cal-head">
+      <h2 id="cal-title">{e.title}</h2>
+      <p>{e.lead}</p>
+    </div>
+    <ol class="cal-list" data-cal>
+      {events.map((ev, i) => (
+        <li class={i >= FIRST ? 'cal-row is-extra' : 'cal-row'} data-end={ev.end}>
+          <time class="cal-date" datetime={ev.start}>
+            <span class="cal-days">{range(ev.start, ev.end)}</span>
+            <span class="cal-month">{month.format(d(ev.start))}</span>
+          </time>
+          <div class="cal-main">
+            <h3 lang={lang === 'ar' && ev.name_ar ? 'ar' : 'en'}>{label(ev)}</h3>
+            <p class="cal-meta">
+              <span>{e.cities[ev.city] ?? ev.city}</span>
+              <span class="cal-sep" aria-hidden="true"></span>
+              <span dir="ltr">{ev.venue}</span>
+              <span class="cal-tag">{e.sectors[ev.sector] ?? ev.sector}</span>
+            </p>
+          </div>
+          <div class="cal-actions">
+            <button type="button" class="btn btn-navy btn-sm" data-plan-event={label(ev)} data-plan-date={`${range(ev.start, ev.end)} ${month.format(d(ev.start))}`}>{e.plan}</button>
+            <a class="cal-link" href={ev.url} target="_blank" rel="noopener">{e.site}<span class="sr"> – {ev.name}</span></a>
+          </div>
+        </li>
+      ))}
+    </ol>
+    <div class="cal-foot">
+      <button type="button" class="btn btn-ghost" data-cal-more aria-expanded="false" data-more-label={e.more} data-less-label={e.less}>{e.more}</button>
+      <p class="cal-src">{e.source}</p>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+(() => {
+  // Hide shows that have already ended, so the list stays current without a rebuild.
+  const today = new Date().toISOString().slice(0, 10);
+  const rows = [...document.querySelectorAll('.cal-row')];
+  rows.forEach((r) => { if (r.dataset.end < today) r.remove(); });
+  const live = [...document.querySelectorAll('.cal-row')];
+  live.forEach((r, i) => r.classList.toggle('is-extra', i >= 8));
+  const more = document.querySelector('[data-cal-more]');
+  if (live.length <= 8) more.hidden = true;
+  more.addEventListener('click', () => {
+    const open = document.querySelector('[data-cal]').classList.toggle('show-all');
+    more.setAttribute('aria-expanded', String(open));
+    more.textContent = open ? more.dataset.lessLabel : more.dataset.moreLabel;
+  });
+})();
+</script>
+
+<style>
+  .cal { background: var(--white); padding-block: clamp(4rem, 9vw, 7rem); }
+  .cal-head { display: grid; gap: .9rem; max-width: 46rem; }
+  .cal-head p { color: var(--ink-2); font-size: 1.05rem; }
+  .cal-list { list-style: none; margin: 2.5rem 0 0; padding: 0; border-top: 2px solid var(--navy); }
+  .cal-row { display: grid; grid-template-columns: 11rem 1fr auto; gap: 1rem 2rem; align-items: center; padding: 1.25rem 0; border-bottom: 1px solid var(--line); }
+  .cal-row.is-extra { display: none; }
+  .cal-list.show-all .cal-row.is-extra { display: grid; }
+  .cal-date { display: grid; line-height: 1.2; }
+  .cal-days { font-size: 1.5rem; font-weight: 700; color: var(--navy); font-variant-numeric: tabular-nums; }
+  .cal-month { font-size: .9rem; color: var(--blue); font-weight: 600; margin-top: .2rem; }
+  .cal-main h3 { font-size: 1.12rem; font-weight: 600; }
+  .cal-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem .6rem; margin-top: .3rem; color: var(--ink-2); font-size: .92rem; }
+  .cal-sep { width: 4px; height: 4px; background: var(--amber); }
+  .cal-tag { margin-inline-start: .4rem; font-size: .78rem; font-weight: 600; color: var(--navy); background: var(--mist); padding: .15rem .55rem; }
+  .cal-actions { display: flex; align-items: center; gap: 1.1rem; }
+  .cal-link { font-size: .9rem; font-weight: 600; color: var(--blue); white-space: nowrap; }
+  .cal-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1.75rem; }
+  .cal-src { font-size: .85rem; color: var(--ink-2); }
+  @media (max-width: 760px) {
+    .cal-row { grid-template-columns: 1fr; gap: .5rem; }
+    .cal-date { grid-auto-flow: column; justify-content: start; gap: .6rem; align-items: baseline; }
+    .cal-days { font-size: 1.2rem; }
+  }
+</style>

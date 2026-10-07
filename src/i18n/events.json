@@ -1,0 +1,22 @@
+[
+  {"name":"Saudi Agriculture 2026","name_ar":"المعرض الزراعي السعودي","sector":"agriculture","start":"2026-10-19","end":"2026-10-22","city":"Riyadh","venue":"RICEC","url":"https://www.saudi-agriculture.com/"},
+  {"name":"Global Health Exhibition 2026","name_ar":"","sector":"health","start":"2026-10-26","end":"2026-10-29","city":"Riyadh","venue":"Malham (RECC)","url":"https://www.globalhealthsaudi.com/"},
+  {"name":"Saudi Build 2026","name_ar":"معرض البناء السعودي","sector":"construction","start":"2026-11-02","end":"2026-11-05","city":"Riyadh","venue":"RICEC","url":"https://saudi-build.com/"},
+  {"name":"Saudi Elenex 2026","name_ar":"معرض سعودي إلينكس","sector":"energy","start":"2026-11-02","end":"2026-11-05","city":"Riyadh","venue":"RICEC","url":"https://www.saudielenex.com/"},
+  {"name":"Cityscape Global 2026","name_ar":"","sector":"realestate","start":"2026-11-16","end":"2026-11-19","city":"Riyadh","venue":"Malham (RECC)","url":"https://www.cityscapeglobal.com/"},
+  {"name":"Foodex Saudi 2026","name_ar":"فوديكس السعودية","sector":"food","start":"2026-11-23","end":"2026-11-25","city":"Jeddah","venue":"JIECC","url":"https://www.foodexsaudiexpo.com/"},
+  {"name":"Saudi Intermobility Expo 2026","name_ar":"","sector":"mobility","start":"2026-11-30","end":"2026-12-02","city":"Riyadh","venue":"RFECC","url":"https://informaconnect.com/intermobility-expo/"},
+  {"name":"Black Hat MEA 2026","name_ar":"","sector":"tech","start":"2026-12-01","end":"2026-12-03","city":"Riyadh","venue":"Malham (RECC)","url":"https://www.blackhatmea.com/"},
+  {"name":"CPHI Middle East 2026","name_ar":"","sector":"health","start":"2026-12-14","end":"2026-12-16","city":"Riyadh","venue":"Malham (RECC)","url":"https://www.cphi.com/middle-east/en/home.html"},
+  {"name":"Automechanika Riyadh 2027","name_ar":"","sector":"auto","start":"2027-01-11","end":"2027-01-13","city":"Riyadh","venue":"RFECC","url":"https://automechanika-riyadh.ksa.messefrankfurt.com/"},
+  {"name":"Jeddah Construct 2027","name_ar":"","sector":"construction","start":"2027-03-22","end":"2027-03-24","city":"Jeddah","venue":"JIECC","url":"https://www.jeddahconstruct.com/"},
+  {"name":"LEAP 2027","name_ar":"","sector":"tech","start":"2027-04-12","end":"2027-04-15","city":"Riyadh","venue":"Malham (RECC)","url":"https://onegiantleap.com/"},
+  {"name":"Saudi Plastics & Petrochem 2027","name_ar":"المعرض السعودي للبلاستيك والصناعات البتروكيماوية","sector":"industry","start":"2027-04-26","end":"2027-04-29","city":"Riyadh","venue":"RICEC","url":"https://saudipp.com/"},
+  {"name":"Saudi Smart Logistics 2027","name_ar":"","sector":"industry","start":"2027-04-26","end":"2027-04-29","city":"Riyadh","venue":"RICEC","url":"https://saudi-smartlogistics.com/"},
+  {"name":"Big 5 Construct Saudi 2027 · Architecture & Finishes","name_ar":"","sector":"construction","start":"2027-05-24","end":"2027-05-27","city":"Riyadh","venue":"RFECC","url":"https://www.big5constructsaudi.com/"},
+  {"name":"SEA Expo 2027","name_ar":"","sector":"entertainment","start":"2027-06-01","end":"2027-06-03","city":"Riyadh","venue":"RFECC","url":"https://www.saudientertainmentexpo.com/"},
+  {"name":"Beautyworld Saudi Arabia 2027","name_ar":"","sector":"beauty","start":"2027-06-21","end":"2027-06-23","city":"Riyadh","venue":"RFECC","url":"https://beautyworld-riyadh.ksa.messefrankfurt.com/"},
+  {"name":"Hotel & Hospitality Expo Saudi Arabia 2027","name_ar":"","sector":"hospitality","start":"2027-09-11","end":"2027-09-13","city":"Riyadh","venue":"RFECC","url":"https://www.thehotelshowsaudiarabia.com/"},
+  {"name":"INDEX Saudi Arabia 2027","name_ar":"","sector":"interiors","start":"2027-09-11","end":"2027-09-13","city":"Riyadh","venue":"RFECC","url":"https://www.index-saudi.com/"},
+  {"name":"Big 5 Construct Saudi 2027 · Construction","name_ar":"","sector":"construction","start":"2027-09-19","end":"2027-09-22","city":"Riyadh","venue":"RFECC","url":"https://www.big5constructsaudi.com/"}
+]

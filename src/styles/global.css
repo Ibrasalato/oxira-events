@@ -235,7 +235,7 @@ section h2 { font-size: clamp(1.75rem, 3.4vw, 2.6rem); font-weight: 700; }
 .f textarea { resize: vertical; min-height: 7rem; }
 .f input:focus, .f select:focus, .f textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,125,180,.18); background: #fff; }
 .f-note { font-size: .85rem; color: var(--ink-2); margin-top: -.4rem; }
-.hp { position: absolute; inset-inline-start: -9999px; }
+.hp { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .f-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; margin-top: .5rem; }
 .f-status { font-size: .95rem; flex: 1 1 14rem; }
 .f-status.is-ok { color: #0B6B3A; font-weight: 600; }
@@ -298,3 +298,5 @@ section h2 { font-size: clamp(1.75rem, 3.4vw, 2.6rem); font-weight: 700; }
   .chat-fab span { display: none; }
   .chat-fab { padding: .85rem; }
 }
+.foot-link { color: #9FB3C9; }
+.foot-link:hover { color: #fff; }

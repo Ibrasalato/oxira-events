@@ -20,6 +20,9 @@ npm run build    # static site in dist/
 | Page markup, gallery, lightbox, quote form, chat widget | `src/components/Site.astro` |
 | Styles and brand tokens | `src/styles/global.css` |
 | Project photos (from the company profile) | `public/img/work/<n>-s.webp` (720px) and `-l.webp` (1400px) |
+| Upcoming exhibitions calendar (edit to add/remove shows; ended shows hide themselves) | `src/i18n/events.json` |
+| Calendar, stand planner, privacy and 404 copy (5 languages) | `src/i18n/extra.ts` |
+| Share images per language (1200×630) | `public/og-<lang>.jpg` |
 | n8n workflow source (reference copy) | `n8n/oxira-events.workflow.ts` |
 
 To add a project: put `<id>-s.webp` and `<id>-l.webp` in `public/img/work/`, add its size to `src/i18n/work-dims.json`, and add `{ id, brand? }` to `WORK` in `content.ts`.

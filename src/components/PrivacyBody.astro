@@ -1,0 +1,14 @@
+---
+import { x } from '../i18n/extra';
+import type { Lang } from '../i18n/content';
+interface Props { lang: Lang }
+const p = x[Astro.props.lang].privacy;
+---
+<h1>{p.title}</h1>
+<p class="doc-meta">{p.updated}</p>
+{p.body.map((b) => (
+  <>
+    <h2>{b.h}</h2>
+    <p>{b.p}</p>
+  </>
+))}

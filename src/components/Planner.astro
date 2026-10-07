@@ -1,0 +1,262 @@
+---
+import events from '../i18n/events.json';
+import { x } from '../i18n/extra';
+import type { Lang } from '../i18n/content';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const p = x[lang].planner;
+const SIZES = [9, 18, 36, 54, 72, 100];
+const evName = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? ev.name_ar : ev.name);
+---
+<section id="planner" class="planner" aria-labelledby="planner-title">
+  <div class="wrap">
+    <div class="pl-head">
+      <h2 id="planner-title">{p.title}</h2>
+      <p>{p.lead}</p>
+    </div>
+
+    <div class="pl-grid">
+      <form class="pl-form" data-planner>
+        <fieldset>
+          <legend>{p.size} ({p.sqm})</legend>
+          <div class="seg">
+            {SIZES.map((s) => (
+              <label class="seg-opt">
+                <input type="radio" name="size" value={s} checked={s === 36} />
+                <span><bdi>{s === 100 ? '100+' : s}</bdi></span>
+              </label>
+            ))}
+          </div>
+          <label class="pl-custom">
+            <span>{p.sizeCustom}</span>
+            <input type="number" name="sizeCustom" min="4" max="2000" inputmode="numeric" dir="ltr" placeholder="—" />
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>{p.type}</legend>
+          <div class="types">
+            {p.types.map((ty, i) => (
+              <label class="type-opt">
+                <input type="radio" name="type" value={ty.id} checked={ty.id === 'corner'} />
+                <span class="type-card">
+                  <svg viewBox="0 0 40 40" aria-hidden="true">
+                    <rect x="8" y="8" width="24" height="24" fill="var(--mist)" />
+                    {i < 3 && <line x1="8" y1="8" x2="32" y2="8" stroke="var(--navy)" stroke-width="3" />}
+                    {i < 2 && <line x1="8" y1="8" x2="8" y2="32" stroke="var(--navy)" stroke-width="3" />}
+                    {i < 1 && <line x1="32" y1="8" x2="32" y2="32" stroke="var(--navy)" stroke-width="3" />}
+                  </svg>
+                  <span class="type-t">{ty.t}</span>
+                  <span class="type-d">{ty.d}</span>
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>{p.build}</legend>
+          <div class="seg seg-wrap">
+            {p.builds.map((b) => (
+              <label class="seg-opt">
+                <input type="radio" name="build" value={b.id} checked={b.id === 'custom'} />
+                <span>{b.t}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>{p.extras}</legend>
+          <div class="checks">
+            {p.extrasList.map((ex) => (
+              <label class="check">
+                <input type="checkbox" name="extras" value={ex.id} />
+                <span>{ex.t}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <label class="pl-event">
+          <span>{p.event}</span>
+          <select name="event">
+            <option value="">{p.eventNone}</option>
+            {events.map((ev) => <option value={evName(ev)}>{evName(ev)}</option>)}
+          </select>
+        </label>
+      </form>
+
+      <aside class="pl-out" aria-live="polite">
+        <p class="pl-out-t">{p.plan}</p>
+        <div class="pl-draw">
+          <svg viewBox="0 0 320 240" data-plan-svg role="img" aria-label={p.plan}></svg>
+        </div>
+        <p class="pl-out-t">{p.summary}</p>
+        <p class="pl-sum" data-plan-summary></p>
+        <button type="button" class="btn btn-amber" data-plan-apply>{p.apply}</button>
+        <p class="pl-note" data-plan-note role="status"></p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<script is:inline define:vars={{ P: p, lang }}>
+(() => {
+  const form = document.querySelector('[data-planner]');
+  const svg = document.querySelector('[data-plan-svg]');
+  const sumEl = document.querySelector('[data-plan-summary]');
+  const NS = 'http://www.w3.org/2000/svg';
+  const nf = new Intl.NumberFormat(lang === 'ar' ? 'ar-u-nu-latn' : lang);
+  let eventDate = '';
+
+  const state = () => {
+    const f = new FormData(form);
+    const custom = Number(f.get('sizeCustom')) || 0;
+    const size = custom >= 4 ? custom : Number(f.get('size'));
+    return {
+      size, plus: !custom && Number(f.get('size')) === 100,
+      type: f.get('type'), build: f.get('build'),
+      extras: f.getAll('extras'), event: f.get('event'),
+    };
+  };
+  const dims = (a) => {
+    const d = a <= 12 ? 3 : a <= 30 ? Math.min(5, Math.round(Math.sqrt(a))) : a <= 64 ? 6 : a <= 120 ? 8 : 10;
+    const w = Math.max(d, Math.round((a / d) * 2) / 2);
+    return [w, d];
+  };
+  const el = (n, a, txt) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); if (txt) e.textContent = txt; svg.append(e); return e; };
+
+  const draw = (s) => {
+    svg.innerHTML = '';
+    const [w, d] = dims(s.size);
+    const maxW = 220, maxH = 140, k = Math.min(maxW / w, maxH / d);
+    const W = w * k, H = d * k, X = (320 - W) / 2, Y = 30 + (160 - H) / 2;
+    const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+    el('rect', { x: 0, y: 0, width: 320, height: 240, fill: css('--paper') });
+    el('rect', { x: X, y: Y, width: W, height: H, fill: css('--mist') });
+    // closed sides: back always closed except island; sides depending on type
+    const open = { row: ['front'], corner: ['front', 'right'], peninsula: ['front', 'right', 'left'], island: ['front', 'right', 'left', 'back'] }[s.type];
+    const sides = { back: [X, Y, X + W, Y], front: [X, Y + H, X + W, Y + H], left: [X, Y, X, Y + H], right: [X + W, Y, X + W, Y + H] };
+    for (const [name, [x1, y1, x2, y2]] of Object.entries(sides)) {
+      const isOpen = open.includes(name);
+      el('line', { x1, y1, x2, y2, stroke: isOpen ? css('--amber') : css('--navy'), 'stroke-width': isOpen ? 3 : 7, 'stroke-dasharray': isOpen ? '7 6' : '', 'stroke-linecap': 'square' });
+    }
+    // aisle labels on open sides
+    const lab = { front: [160, Y + H + 22], back: [160, Y - 12], left: [X - 14, Y + H / 2], right: [X + W + 14, Y + H / 2] };
+    for (const name of open) {
+      const [lx, ly] = lab[name];
+      const t = el('text', { x: lx, y: ly, 'text-anchor': 'middle', 'font-size': 11, fill: css('--ink-2'), 'font-family': 'inherit' }, P.aisle);
+      if (name === 'left' || name === 'right') t.setAttribute('transform', `rotate(-90 ${lx} ${ly})`);
+    }
+    // inside: optional meeting room / storage blocks
+    let bx = X + 6;
+    const block = (label, bw) => {
+      el('rect', { x: bx, y: Y + 6, width: bw, height: Math.min(40, H * 0.38), fill: '#fff', stroke: css('--line') });
+      el('text', { x: bx + bw / 2, y: Y + 6 + Math.min(40, H * 0.38) / 2 + 4, 'text-anchor': 'middle', 'font-size': 9.5, fill: css('--ink-2'), 'font-family': 'inherit' }, label);
+      bx += bw + 6;
+    };
+    const tx = (id) => P.extrasList.find((e) => e.id === id).t;
+    if (s.extras.includes('meeting')) block(tx('meeting'), Math.min(118, W * 0.48));
+    if (s.extras.includes('storage')) block(tx('storage'), Math.min(64, W * 0.26));
+    if (s.extras.includes('led')) el('rect', { x: X + W - Math.min(70, W * 0.35) - 8, y: Y + 3, width: Math.min(70, W * 0.35), height: 5, fill: css('--blue') });
+    if (s.extras.includes('counter')) el('rect', { x: X + W / 2 - 22, y: Y + H - 16, width: 44, height: 9, fill: css('--navy') });
+    // dimension label
+    el('text', { x: 160, y: 222, 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 600, fill: css('--navy'), 'font-family': 'inherit', direction: 'ltr' }, `${nf.format(w)} × ${nf.format(d)} m  ·  ${nf.format(s.size)}${s.plus ? '+' : ''} m²`);
+  };
+
+  const summary = (s) => {
+    const ty = P.types.find((t) => t.id === s.type);
+    const b = P.builds.find((x) => x.id === s.build).t;
+    const ex = s.extras.map((id) => P.extrasList.find((e) => e.id === id).t);
+    const parts = [`${P.size}: ${nf.format(s.size)}${s.plus ? '+' : ''} ${P.sqm}`, `${ty.d} (${ty.t})`, b];
+    if (ex.length) parts.push(ex.join(lang === 'ar' ? '، ' : ', '));
+    if (s.event) parts.push(`${P.event}: ${s.event}${eventDate ? ' · ' + eventDate : ''}`);
+    return parts.join(' — ');
+  };
+
+  const update = () => { const s = state(); draw(s); sumEl.textContent = summary(s); };
+  form.addEventListener('input', (e) => {
+    if (e.target.name === 'size') form.sizeCustom.value = '';
+    if (e.target.name === 'event') eventDate = '';
+    update();
+  });
+  update();
+
+  // Calendar → planner
+  document.querySelectorAll('[data-plan-event]').forEach((b) => b.addEventListener('click', () => {
+    form.event.value = b.dataset.planEvent;
+    eventDate = b.dataset.planDate;
+    update();
+    document.getElementById('planner').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  }));
+
+  // Planner → quote form
+  document.querySelector('[data-plan-apply]').addEventListener('click', () => {
+    const s = state();
+    const q = document.querySelector('[data-quote]');
+    q.stand_size.value = `${s.size}${s.plus ? '+' : ''}`;
+    if (s.event) q.event_name.value = s.event;
+    if (eventDate) q.event_date.value = eventDate;
+    q.service.selectedIndex = 0;
+    const text = summary(s);
+    q.details.value = q.details.value.trim() ? q.details.value.trim() + '\n' + text : text;
+    document.querySelector('[data-plan-note]').textContent = P.applied;
+    document.getElementById('contact').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    setTimeout(() => q.name.focus({ preventScroll: true }), 500);
+  });
+})();
+</script>
+
+<style>
+  .planner { padding-block: clamp(4rem, 9vw, 7rem); background: var(--paper); }
+  .pl-head { display: grid; gap: .9rem; max-width: 46rem; }
+  .pl-head p { color: var(--ink-2); font-size: 1.05rem; }
+  .pl-grid > * { min-width: 0; }
+  .pl-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(1.5rem, 4vw, 3.5rem); margin-top: 2.5rem; align-items: start; }
+  .pl-form { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.75rem; }
+  fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+  legend { font-weight: 700; font-size: 1rem; margin-bottom: .7rem; padding: 0; }
+  .seg { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); border: 1px solid var(--line); background: #fff; }
+  .seg-wrap { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .seg-opt { position: relative; }
+  .seg-opt + .seg-opt { border-inline-start: 1px solid var(--line); }
+  .seg-opt input, .type-opt input, .check input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .seg-opt span { display: grid; place-items: center; min-height: 3rem; padding: .5rem; font-weight: 600; font-size: .95rem; text-align: center; color: var(--ink-2); }
+  .seg-opt input:checked + span { background: var(--navy); color: #fff; }
+  .seg-opt input:focus-visible + span, .type-opt input:focus-visible + .type-card, .check input:focus-visible + span { outline: 3px solid var(--amber); outline-offset: 2px; }
+  .pl-custom { display: inline-flex; align-items: center; gap: .6rem; margin-top: .7rem; font-size: .9rem; color: var(--ink-2); }
+  .pl-custom input { width: 7rem; border: 1px solid var(--line); background: #fff; padding: .5rem .6rem; font: inherit; }
+  .types { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .6rem; }
+  .type-opt { position: relative; }
+  .type-card { display: grid; justify-items: center; gap: .2rem; padding: .9rem .5rem; background: #fff; border: 1px solid var(--line); text-align: center; height: 100%; }
+  .type-card svg { width: 44px; height: 44px; }
+  .type-t { font-weight: 700; font-size: .92rem; }
+  .type-d { font-size: .8rem; color: var(--ink-2); }
+  .type-opt input:checked + .type-card { border-color: var(--navy); box-shadow: inset 0 0 0 2px var(--navy); }
+  .checks { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .check { position: relative; }
+  .check span { display: inline-block; padding: .55rem .9rem; border: 1px solid var(--line); background: #fff; font-size: .92rem; cursor: pointer; }
+  .check input:checked + span { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .pl-event { display: grid; grid-template-columns: minmax(0, 1fr); gap: .45rem; font-weight: 700; }
+  .pl-event select { width: 100%; min-width: 0; font-weight: 400; border: 1px solid var(--line); background: #fff; padding: .7rem .8rem; min-height: 3rem; font: inherit; }
+  .pl-out { position: sticky; top: 5.5rem; background: #fff; border: 1px solid var(--line); padding: 1.5rem; display: grid; gap: .9rem; }
+  .pl-out-t { font-size: .85rem; font-weight: 700; color: var(--blue); }
+  .pl-draw svg { width: 100%; height: auto; display: block; }
+  .pl-sum { font-size: 1rem; line-height: 1.8; min-height: 3.6em; }
+  .pl-note { font-size: .9rem; color: #0B6B3A; font-weight: 600; }
+  .pl-note:empty { display: none; }
+  @media (max-width: 960px) {
+    .pl-grid { grid-template-columns: minmax(0, 1fr); }
+    .pl-out { position: static; }
+  }
+  @media (max-width: 560px) {
+    .seg { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .seg-opt:nth-child(4) { border-inline-start: 0; }
+    .seg-opt:nth-child(n + 4) { border-top: 1px solid var(--line); }
+    .seg-wrap { grid-template-columns: 1fr; }
+    .seg-wrap .seg-opt + .seg-opt { border-inline-start: 0; border-top: 1px solid var(--line); }
+    .types { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+</style>
