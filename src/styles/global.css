@@ -13,7 +13,7 @@
   --white: #FFFFFF;
   --cut: 22px;
   --wrap: 1200px;
-  --font: 'Alexandria Variable', 'Alexandria', system-ui, -apple-system, 'Segoe UI', Tahoma, sans-serif;
+  --font: 'IBM Plex Sans', 'Cairo', system-ui, -apple-system, 'Segoe UI', Tahoma, sans-serif;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -28,6 +28,7 @@ body {
 img { max-width: 100%; height: auto; display: block; }
 a { color: inherit; }
 h1, h2, h3 { margin: 0; line-height: 1.25; font-weight: 700; letter-spacing: -.01em; }
+[dir='rtl'] h1, [dir='rtl'] h2, [dir='rtl'] h3 { letter-spacing: 0; }
 p { margin: 0; }
 button, input, select, textarea { font: inherit; color: inherit; }
 :focus-visible { outline: 3px solid var(--amber); outline-offset: 3px; }

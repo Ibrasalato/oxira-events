@@ -19,7 +19,7 @@ const SYSTEM = '=أنت "مساعد أوكسيرا للفعاليات"، الم�
 'من أعمالنا (أجنحة ومسارح نفذناها لعلامات تجارية في معارض متخصصة): Corpotrade، GRACE، ParkPoint، Hutchison Ports، Kimpur، TavSan، Ferre، AMAKEN، Turbosan، إضافات (Edafat)، Emilia، LIANSU، Al Ahmady، Jiwani Worldwide، ومسرح أرامكو السعودية في مؤتمر IPTC 2020. لا تذكر أسماء غير هذه.\n\n' +
 'بيانات المحادثة:\n' +
 '- الوقت الآن (الرياض): {{ $now.setZone("Asia/Riyadh").toFormat("yyyy-MM-dd HH:mm") }}\n' +
-'- لغة صفحة الموقع: {{ $("Message").first().json.lang === "en" ? "English" : "العربية" }}\n\n' +
+'- لغة صفحة الموقع: {{ ({ ar: "العربية", en: "English", de: "Deutsch", fr: "Français", ru: "Русский" })[$("Message").first().json.lang] || "العربية" }}\n\n' +
 'طريقة المحادثة:\n' +
 '1. افهم ما يحتاجه الزائر: نوع الفعالية (معرض، مؤتمر، إطلاق منتج، فعالية شركة)، واسأل سؤالاً واحداً في كل رسالة.\n' +
 '2. اقترح الخدمة المناسبة باختصار مع مثال من أعمالنا قريب من مجاله.\n' +
@@ -79,7 +79,7 @@ const message = node({
         assignments: [
           { id: 'm-sid', name: 'session_id', value: expr("{{ 'oxira_events_' + String($json.body?.sessionId || '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64) }}"), type: 'string' },
           { id: 'm-text', name: 'text', value: expr("{{ String($json.body?.message || '').trim().slice(0, 2000) }}"), type: 'string' },
-          { id: 'm-lang', name: 'lang', value: expr("{{ $json.body?.lang === 'en' ? 'en' : 'ar' }}"), type: 'string' },
+          { id: 'm-lang', name: 'lang', value: expr("{{ ['ar','en','de','fr','ru'].includes($json.body?.lang) ? $json.body.lang : 'ar' }}"), type: 'string' },
           { id: 'm-page', name: 'page', value: expr("{{ String($json.body?.page || '').slice(0, 300) }}"), type: 'string' },
           { id: 'm-valid', name: 'valid', value: expr("{{ String($json.body?.sessionId || '').length >= 6 && String($json.body?.message || '').trim().length > 0 }}"), type: 'boolean' }
         ]
@@ -249,7 +249,7 @@ const prepareForm = node({
           { id: 'f-date', name: 'event_date', value: expr("{{ String($json.body?.event_date || '').trim().slice(0, 80) }}"), type: 'string' },
           { id: 'f-size', name: 'stand_size', value: expr("{{ String($json.body?.stand_size || '').trim().slice(0, 40) }}"), type: 'string' },
           { id: 'f-details', name: 'needs', value: expr("{{ String($json.body?.details || '').trim().slice(0, 5000) }}"), type: 'string' },
-          { id: 'f-lang', name: 'lang', value: expr("{{ $json.body?.lang === 'en' ? 'en' : 'ar' }}"), type: 'string' },
+          { id: 'f-lang', name: 'lang', value: expr("{{ ['ar','en','de','fr','ru'].includes($json.body?.lang) ? $json.body.lang : 'ar' }}"), type: 'string' },
           { id: 'f-page', name: 'page', value: expr("{{ String($json.body?.page || '').slice(0, 300) }}"), type: 'string' },
           { id: 'f-valid', name: 'valid', value: expr("{{ !$json.body?.company_website && String($json.body?.name || '').trim().length > 0 && String($json.body?.details || '').trim().length > 0 && (String($json.body?.email || '').trim().length > 0 || String($json.body?.phone || '').trim().length > 0) }}"), type: 'boolean' }
         ]

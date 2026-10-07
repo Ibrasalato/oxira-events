@@ -1,6 +1,6 @@
 # Oxira Events — events.oxira.sa
 
-Bilingual (Arabic default, English at `/en/`) site for Oxira Events: exhibition stand design and build, conference stages, lighting and screens, print, giveaways and media production.
+Arabic by default, plus English, German, French and Russian at `/en/`, `/de/`, `/fr/`, `/ru/` site for Oxira Events: exhibition stand design and build, conference stages, lighting and screens, print, giveaways and media production.
 
 Built with [Astro](https://astro.build), deployed to GitHub Pages by `.github/workflows/deploy.yml` on every push to `main`. The custom domain is set in `public/CNAME`.
 
@@ -16,7 +16,7 @@ npm run build    # static site in dist/
 
 | What | File |
 | --- | --- |
-| All copy (AR + EN), contact details, n8n webhook URLs | `src/i18n/content.ts` |
+| All copy (AR, EN, DE, FR, RU), contact details, n8n webhook URLs | `src/i18n/content.ts` |
 | Page markup, gallery, lightbox, quote form, chat widget | `src/components/Site.astro` |
 | Styles and brand tokens | `src/styles/global.css` |
 | Project photos (from the company profile) | `public/img/work/<n>-s.webp` (720px) and `-l.webp` (1400px) |

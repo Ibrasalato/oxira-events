@@ -1,6 +1,7 @@
 ---
 import Logo from './Logo.astro';
-import { t, WORK, AISLE, CONTACT, N8N, type Lang } from '../i18n/content';
+import LangPicker from './LangPicker.astro';
+import { t, WORK, AISLE, CONTACT, N8N, langPath, type Lang } from '../i18n/content';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -10,19 +11,19 @@ const img = (p: string) => `${base}/img/${p}`;
 const aisle = AISLE.map((id) => WORK.find((w) => w.id === id)!);
 const FIRST = 12;
 ---
-<a class="skip" href="#main">{lang === 'ar' ? 'تخطَّ إلى المحتوى' : 'Skip to content'}</a>
+<a class="skip" href="#main">{({ ar: 'تخطَّ إلى المحتوى', en: 'Skip to content', de: 'Zum Inhalt springen', fr: 'Aller au contenu', ru: 'Перейти к содержимому' })[lang]}</a>
 
 <header class="top">
   <div class="wrap top-row">
-    <a href={lang === 'ar' ? `${base}/` : `${base}/en/`} aria-label="Oxira Events"><Logo /></a>
-    <nav class="nav" aria-label={lang === 'ar' ? 'الرئيسية' : 'Main'}>
+    <a href={`${base}${langPath(lang)}`} aria-label="Oxira Events"><Logo /></a>
+    <nav class="nav" aria-label={c.nav.services}>
       <a href="#services">{c.nav.services}</a>
       <a href="#work">{c.nav.work}</a>
       <a href="#about">{c.nav.about}</a>
       <a href="#contact">{c.nav.contact}</a>
     </nav>
     <div class="top-actions">
-      <a class="lang" href={`${base}${c.switchHref}`} hreflang={lang === 'ar' ? 'en' : 'ar'} lang={lang === 'ar' ? 'en' : 'ar'}>{c.switchLabel}</a>
+      <LangPicker lang={lang} />
       <a class="btn btn-amber btn-sm" href="#contact">{c.quote}</a>
     </div>
   </div>
