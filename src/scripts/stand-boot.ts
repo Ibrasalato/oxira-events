@@ -96,7 +96,7 @@ export function boot() {
   const io = new IntersectionObserver((entries) => {
     if (entries.some((e) => e.isIntersecting)) { io.disconnect(); ensure(); }
   }, { rootMargin: '400px' });
-  io.observe(out);
+  io.observe(host);
 
   let t = 0;
   form.addEventListener('input', () => {

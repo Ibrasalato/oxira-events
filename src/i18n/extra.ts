@@ -2,6 +2,7 @@ import type { Lang } from './content';
 
 // Copy for the exhibitions calendar, the stand planner, the privacy page and the 404 page.
 type Extra = {
+  cta: { design3d: string; navPlanner: string; orChat: string };
   cal: {
     title: string; lead: string; plan: string; site: string; more: string; less: string; source: string;
     sectors: Record<string, string>; cities: Record<string, string>;
@@ -18,6 +19,7 @@ type Extra = {
     look: string; wall: string; walls: { id: string; t: string }[]; accent: string;
     carpet: string; carpets: { id: string; t: string }[];
     logo: string; logoPick: string; logoHint: string; logoClear: string;
+    concept: string;
     view3d: string; view2d: string; loading: string; noWebgl: string; drag: string; reset: string; save: string; attached: string;
   };
   privacy: { link: string; title: string; updated: string; body: { h: string; p: string }[] };
@@ -25,6 +27,7 @@ type Extra = {
 };
 
 const ar: Extra = {
+  cta: { design3d: 'صمّم جناحك ثلاثي الأبعاد', navPlanner: 'صمّم جناحك', orChat: 'أو تحدث مع المساعد الذكي' },
   cal: {
     title: 'معارض قادمة في السعودية',
     lead: 'أبرز المعارض المؤكدة مواعيدها من منظميها. اختر معرضك ونبدأ تصميم جناحك قبلها بوقت كافٍ.',
@@ -67,6 +70,7 @@ const ar: Extra = {
     look: 'المظهر', wall: 'لون الجدران', walls: [{ id: 'white', t: 'أبيض' }, { id: 'navy', t: 'كحلي' }, { id: 'black', t: 'أسود' }, { id: 'wood', t: 'خشبي' }], accent: 'لون علامتك',
     carpet: 'الأرضية', carpets: [{ id: 'grey', t: 'موكيت رمادي' }, { id: 'blue', t: 'موكيت أزرق' }, { id: 'red', t: 'موكيت أحمر' }, { id: 'wood', t: 'باركيه' }],
     logo: 'شعارك', logoPick: 'ارفع الشعار', logoHint: 'PNG أو JPG. يظهر على الجناح هنا، ولا يُرسل إلا مع طلبك.', logoClear: 'إزالة',
+    concept: 'تصور مبدئي، والتصميم النهائي يجهزه فريقنا',
     view3d: 'ثلاثي الأبعاد', view2d: 'المسقط', loading: 'جارٍ تجهيز التصميم ثلاثي الأبعاد…', noWebgl: 'متصفحك لا يدعم العرض ثلاثي الأبعاد، نعرض لك المسقط.', drag: 'اسحب للتدوير، وقرّب بعجلة الماوس أو بإصبعين.', reset: 'الزاوية الافتراضية', save: 'حفظ الصورة', attached: 'سيُرفق تصميمك ثلاثي الأبعاد مع الطلب ليبدأ منه مصممونا.',
   },
   privacy: {
@@ -87,6 +91,7 @@ const ar: Extra = {
 };
 
 const en: Extra = {
+  cta: { design3d: 'Design your stand in 3D', navPlanner: 'Design your stand', orChat: 'or chat with our AI assistant' },
   cal: {
     title: 'Upcoming exhibitions in Saudi Arabia',
     lead: 'Major shows with dates confirmed by their organizers. Pick yours and we start your stand design with time to spare.',
@@ -129,6 +134,7 @@ const en: Extra = {
     look: 'Look', wall: 'Wall colour', walls: [{ id: 'white', t: 'White' }, { id: 'navy', t: 'Navy' }, { id: 'black', t: 'Black' }, { id: 'wood', t: 'Wood' }], accent: 'Brand colour',
     carpet: 'Floor', carpets: [{ id: 'grey', t: 'Grey carpet' }, { id: 'blue', t: 'Blue carpet' }, { id: 'red', t: 'Red carpet' }, { id: 'wood', t: 'Wood floor' }],
     logo: 'Your logo', logoPick: 'Upload logo', logoHint: 'PNG or JPG. Shown on the stand here, and only sent with your request.', logoClear: 'Remove',
+    concept: 'Initial concept. Our team prepares the final design',
     view3d: '3D', view2d: 'Plan', loading: 'Preparing the 3D design…', noWebgl: 'Your browser can’t show 3D, so here is the plan.', drag: 'Drag to rotate, zoom with the mouse wheel or two fingers.', reset: 'Reset view', save: 'Save image', attached: 'Your 3D design will be attached to the request for our designers to start from.',
   },
   privacy: {
@@ -149,6 +155,7 @@ const en: Extra = {
 };
 
 const de: Extra = {
+  cta: { design3d: 'Stand in 3D gestalten', navPlanner: 'Stand gestalten', orChat: 'oder mit unserem KI-Assistenten chatten' },
   cal: {
     title: 'Kommende Messen in Saudi-Arabien',
     lead: 'Große Messen mit vom Veranstalter bestätigten Terminen. Wählen Sie Ihre Messe, und wir beginnen rechtzeitig mit dem Standentwurf.',
@@ -191,6 +198,7 @@ const de: Extra = {
     look: 'Gestaltung', wall: 'Wandfarbe', walls: [{ id: 'white', t: 'Weiß' }, { id: 'navy', t: 'Marine' }, { id: 'black', t: 'Schwarz' }, { id: 'wood', t: 'Holz' }], accent: 'Markenfarbe',
     carpet: 'Boden', carpets: [{ id: 'grey', t: 'Teppich grau' }, { id: 'blue', t: 'Teppich blau' }, { id: 'red', t: 'Teppich rot' }, { id: 'wood', t: 'Holzboden' }],
     logo: 'Ihr Logo', logoPick: 'Logo hochladen', logoHint: 'PNG oder JPG. Wird hier auf dem Stand gezeigt und nur mit Ihrer Anfrage gesendet.', logoClear: 'Entfernen',
+    concept: 'Erster Entwurf. Das finale Design erstellt unser Team',
     view3d: '3D', view2d: 'Grundriss', loading: '3D-Entwurf wird vorbereitet…', noWebgl: 'Ihr Browser kann kein 3D anzeigen, hier ist der Grundriss.', drag: 'Ziehen zum Drehen, Zoom mit Mausrad oder zwei Fingern.', reset: 'Ansicht zurücksetzen', save: 'Bild speichern', attached: 'Ihr 3D-Entwurf wird der Anfrage beigefügt, damit unsere Designer darauf aufbauen.',
   },
   privacy: {
@@ -211,6 +219,7 @@ const de: Extra = {
 };
 
 const fr: Extra = {
+  cta: { design3d: 'Concevez votre stand en 3D', navPlanner: 'Concevoir mon stand', orChat: 'ou discutez avec notre assistant IA' },
   cal: {
     title: 'Salons à venir en Arabie saoudite',
     lead: 'Les grands salons dont les dates sont confirmées par les organisateurs. Choisissez le vôtre et nous lançons la conception de votre stand à temps.',
@@ -253,6 +262,7 @@ const fr: Extra = {
     look: 'Apparence', wall: 'Couleur des murs', walls: [{ id: 'white', t: 'Blanc' }, { id: 'navy', t: 'Marine' }, { id: 'black', t: 'Noir' }, { id: 'wood', t: 'Bois' }], accent: 'Couleur de marque',
     carpet: 'Sol', carpets: [{ id: 'grey', t: 'Moquette grise' }, { id: 'blue', t: 'Moquette bleue' }, { id: 'red', t: 'Moquette rouge' }, { id: 'wood', t: 'Parquet' }],
     logo: 'Votre logo', logoPick: 'Importer le logo', logoHint: 'PNG ou JPG. Affiché ici sur le stand, et envoyé uniquement avec votre demande.', logoClear: 'Retirer',
+    concept: 'Esquisse initiale. Notre équipe prépare la conception finale',
     view3d: '3D', view2d: 'Plan', loading: 'Préparation de la vue 3D…', noWebgl: 'Votre navigateur ne peut pas afficher la 3D, voici le plan.', drag: 'Faites glisser pour tourner, zoomez à la molette ou à deux doigts.', reset: 'Vue par défaut', save: 'Enregistrer l’image', attached: 'Votre conception 3D sera jointe à la demande pour servir de base à nos designers.',
   },
   privacy: {
@@ -273,6 +283,7 @@ const fr: Extra = {
 };
 
 const ru: Extra = {
+  cta: { design3d: 'Создайте стенд в 3D', navPlanner: 'Создать стенд', orChat: 'или напишите нашему ИИ-ассистенту' },
   cal: {
     title: 'Ближайшие выставки в Саудовской Аравии',
     lead: 'Крупные выставки с датами, подтверждёнными организаторами. Выберите свою, и мы начнём проект стенда заранее.',
@@ -315,6 +326,7 @@ const ru: Extra = {
     look: 'Оформление', wall: 'Цвет стен', walls: [{ id: 'white', t: 'Белый' }, { id: 'navy', t: 'Тёмно-синий' }, { id: 'black', t: 'Чёрный' }, { id: 'wood', t: 'Дерево' }], accent: 'Цвет бренда',
     carpet: 'Пол', carpets: [{ id: 'grey', t: 'Серый ковролин' }, { id: 'blue', t: 'Синий ковролин' }, { id: 'red', t: 'Красный ковролин' }, { id: 'wood', t: 'Паркет' }],
     logo: 'Ваш логотип', logoPick: 'Загрузить логотип', logoHint: 'PNG или JPG. Показывается здесь на стенде и отправляется только с вашим запросом.', logoClear: 'Убрать',
+    concept: 'Предварительный эскиз. Финальный проект готовит наша команда',
     view3d: '3D', view2d: 'План', loading: 'Готовим 3D-модель…', noWebgl: 'Ваш браузер не поддерживает 3D, показываем план.', drag: 'Перетаскивайте для вращения, масштаб — колесом мыши или двумя пальцами.', reset: 'Исходный вид', save: 'Сохранить изображение', attached: 'Ваш 3D-проект будет приложен к запросу, чтобы дизайнеры начали с него.',
   },
   privacy: {

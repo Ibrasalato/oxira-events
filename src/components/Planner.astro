@@ -140,7 +140,7 @@ const evName = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? e
           <button type="button" role="tab" data-view="2d" aria-selected="false">{p.view2d}</button>
         </div>
         <div class="pl-pane" data-pane="3d">
-          <div class="pl-3d" data-stand3d><p class="pl-status" data-stand-status></p></div>
+          <div class="pl-3d" data-stand3d><span class="pl-concept">{p.concept}</span><p class="pl-status" data-stand-status></p></div>
           <div class="pl-3d-bar">
             <span class="pl-drag">{p.drag}</span>
             <span class="pl-3d-actions">
@@ -152,10 +152,12 @@ const evName = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? e
         <div class="pl-pane pl-draw" data-pane="2d" hidden>
           <svg viewBox="0 0 320 240" data-plan-svg role="img" aria-label={p.plan}></svg>
         </div>
-        <p class="pl-out-t">{p.summary}</p>
-        <p class="pl-sum" data-plan-summary></p>
-        <button type="button" class="btn btn-amber" data-plan-apply>{p.apply}</button>
-        <p class="pl-note" data-plan-note role="status"></p>
+        <div class="pl-sumbox">
+          <p class="pl-out-t">{p.summary}</p>
+          <p class="pl-sum" data-plan-summary></p>
+          <button type="button" class="btn btn-amber" data-plan-apply>{p.apply}</button>
+          <p class="pl-note" data-plan-note role="status"></p>
+        </div>
       </aside>
     </div>
   </div>
@@ -355,6 +357,21 @@ const evName = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? e
   .pl-3d-actions { display: inline-flex; gap: .9rem; }
   .pl-3d-actions button { border: 0; background: none; font: inherit; font-size: .85rem; font-weight: 600; color: var(--blue); cursor: pointer; padding: .2rem 0; }
   .pl-3d-actions button:hover { text-decoration: underline; }
+  .pl-sumbox { display: grid; gap: .9rem; }
+  .pl-concept { position: absolute; top: .6rem; inset-inline-start: .6rem; z-index: 1; max-width: calc(100% - 1.2rem); font-size: .75rem; font-weight: 600; color: var(--navy); background: rgba(255,255,255,.88); padding: .25rem .55rem; pointer-events: none; }
+  @media (max-width: 960px) {
+    /* On phones the 3D view comes first and stays in view while the visitor picks options */
+    .pl-out { display: contents; }
+    .pl-tabs { order: -2; }
+    .pl-pane { order: -1; position: sticky; top: 4.25rem; z-index: 6; background: var(--paper); padding-bottom: .5rem; margin-top: -1rem; box-shadow: 0 10px 14px -12px rgba(10,37,62,.35); }
+    .pl-3d { aspect-ratio: 16 / 10; }
+    .pl-drag { display: none; }
+    .pl-3d-bar { margin-top: .35rem; justify-content: flex-end; }
+    .pl-sumbox { order: 1; background: #fff; border: 1px solid var(--line); padding: 1.25rem; }
+    /* keep focused or scrolled-to controls clear of the pinned 3D view */
+    .pl-form :is(input, select, label, legend) { scroll-margin-top: calc(4.25rem + 62vw + 3rem); }
+  }
+
   @media (max-width: 560px) {
     .look-row { grid-template-columns: 1fr; }
     .look-logo .look-hint { grid-column: 1; }

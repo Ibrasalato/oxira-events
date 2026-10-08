@@ -21,6 +21,7 @@ const FIRST = 12;
     <a href={`${base}${langPath(lang)}`} aria-label="Oxira Events"><Logo /></a>
     <nav class="nav" aria-label={c.nav.services}>
       <a href="#services">{c.nav.services}</a>
+      <a href="#planner">{x[lang].cta.navPlanner}</a>
       <a href="#work">{c.nav.work}</a>
       <a href="#about">{c.nav.about}</a>
       <a href="#contact">{c.nav.contact}</a>
@@ -42,12 +43,16 @@ const FIRST = 12;
       <div class="hero-copy">
         <p class="lead">{c.hero.lead}</p>
         <div class="cta-row">
-          <a class="btn btn-navy" href="#contact">{c.hero.primary}</a>
-          <button class="btn btn-ghost" type="button" data-open-chat>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="9" cy="10.5" r="1.1" fill="currentColor"/><circle cx="12" cy="10.5" r="1.1" fill="currentColor"/><circle cx="15" cy="10.5" r="1.1" fill="currentColor"/></svg>
-            {c.hero.secondary}
-          </button>
+          <a class="btn btn-navy" href="#planner">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 20 7.4v9.2L12 21.2 4 16.6V7.4z M4 7.4l8 4.6 8-4.6 M12 12v9.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+            {x[lang].cta.design3d}
+          </a>
+          <a class="btn btn-ghost" href="#contact">{c.hero.primary}</a>
         </div>
+        <button class="hero-chat" type="button" data-open-chat>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="9" cy="10.5" r="1.1" fill="currentColor"/><circle cx="12" cy="10.5" r="1.1" fill="currentColor"/><circle cx="15" cy="10.5" r="1.1" fill="currentColor"/></svg>
+          {x[lang].cta.orChat}
+        </button>
       </div>
     </div>
 
@@ -89,20 +94,7 @@ const FIRST = 12;
     </div>
   </section>
 
-  <section class="process" aria-labelledby="process-title">
-    <div class="wrap">
-      <h2 id="process-title">{c.process.title}</h2>
-      <ol class="steps">
-        {c.process.steps.map((s, i) => (
-          <li>
-            <span class="step-n" aria-hidden="true">{i + 1}</span>
-            <h3>{s.t}</h3>
-            <p>{s.d}</p>
-          </li>
-        ))}
-      </ol>
-    </div>
-  </section>
+  <Planner lang={lang} />
 
   <section id="work" class="work" aria-labelledby="work-title">
     <div class="wrap">
@@ -124,6 +116,21 @@ const FIRST = 12;
       <div class="work-more">
         <button type="button" class="btn btn-ghost" data-more aria-expanded="false" data-more-label={c.work.more} data-less-label={c.work.less}>{c.work.more}</button>
       </div>
+    </div>
+  </section>
+
+  <section class="process" aria-labelledby="process-title">
+    <div class="wrap">
+      <h2 id="process-title">{c.process.title}</h2>
+      <ol class="steps">
+        {c.process.steps.map((s, i) => (
+          <li>
+            <span class="step-n" aria-hidden="true">{i + 1}</span>
+            <h3>{s.t}</h3>
+            <p>{s.d}</p>
+          </li>
+        ))}
+      </ol>
     </div>
   </section>
 
@@ -151,8 +158,6 @@ const FIRST = 12;
       </div>
     </div>
   </section>
-
-  <Planner lang={lang} />
 
   <section id="contact" class="contact" aria-labelledby="contact-title">
     <div class="wrap contact-grid">

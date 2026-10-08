@@ -25,6 +25,9 @@ export const CONTACT = {
   main: 'https://oxira.sa',
 };
 
+const FEATURED = ['8', '39', '46', '9', '14', '34', '25', '43', '36', '15', '7', '47b'];
+const rank = (id: string) => { const i = FEATURED.indexOf(id); return i === -1 ? 100 : i; };
+
 // Portfolio, in the order of the company profile. `brand` only where the brand is legible in the photo.
 export const WORK: { id: string; brand?: string; w: number; h: number }[] = [
   { id: '7', brand: 'ParkPoint' }, { id: '8', brand: 'Corpotrade' }, { id: '9', brand: 'GRACE' },
@@ -37,10 +40,12 @@ export const WORK: { id: string; brand?: string; w: number; h: number }[] = [
   { id: '40' }, { id: '41' }, { id: '42' }, { id: '43', brand: 'Emilia' }, { id: '44' },
   { id: '45', brand: 'ParkPoint' }, { id: '46', brand: 'Saudi Aramco · IPTC 2020' },
   { id: '47a', brand: 'LIANSU' }, { id: '47b', brand: 'Jiwani Worldwide' },
-].map((x) => ({ ...x, w: (dims as Record<string, number[]>)[x.id][0], h: (dims as Record<string, number[]>)[x.id][1] }));
+].map((x) => ({ ...x, w: (dims as Record<string, number[]>)[x.id][0], h: (dims as Record<string, number[]>)[x.id][1] }))
+  // strongest 12 first (shown by default); the rest keep the profile order behind "Show all"
+  .sort((a, b) => rank(a.id) - rank(b.id));
 
 // Photos for the hero aisle, chosen for strong colour and a clear stand in frame.
-export const AISLE = ['8', '39', '31', '9', '25', '14', '46', '43', '17', '36', '28', '34', '7', '47b'];
+export const AISLE = ['8', '39', '15', '9', '25', '14', '46', '43', '17', '36', '28', '34', '7', '47b'];
 
 const ar = {
   dir: 'rtl',
