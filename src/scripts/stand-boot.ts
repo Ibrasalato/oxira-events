@@ -138,6 +138,55 @@ export function boot() {
   clear?.addEventListener('click', () => { if (file) file.value = ''; setLogo(null); });
 
   out.querySelector('[data-stand-reset]')?.addEventListener('click', () => viewer?.resetView());
+
+  // AI render: snapshot of the 3D concept → n8n "Oxira Events — Booth render" → photoreal image.
+  const rdlg = document.querySelector<HTMLDialogElement>('[data-render-dialog]');
+  if (rdlg) {
+    const rc = JSON.parse(rdlg.dataset.cfg || '{}') as { url: string; lang: string; t: Record<string, string> };
+    const stage = rdlg.querySelector<HTMLElement>('[data-rr-stage]')!;
+    const foot = rdlg.querySelector<HTMLElement>('[data-rr-foot]')!;
+    const leftEl = rdlg.querySelector<HTMLElement>('[data-rr-left]')!;
+    const dl = rdlg.querySelector<HTMLAnchorElement>('[data-rr-dl]')!;
+    const say = (m: string) => { stage.innerHTML = ''; const p = document.createElement('p'); p.className = 'rr-status'; p.textContent = m; stage.append(p); };
+    let sid = '';
+    try { sid = localStorage.getItem('oxira_events_rsid') || ''; } catch { /* private mode */ }
+    if (!sid) { sid = Array.from(crypto.getRandomValues(new Uint8Array(12)), (b) => b.toString(16).padStart(2, '0')).join(''); try { localStorage.setItem('oxira_events_rsid', sid); } catch { /* private mode */ } }
+    let busy = false;
+    out.querySelector('[data-stand-render]')?.addEventListener('click', async () => {
+      if (busy) return;
+      const v = await ensure();
+      if (!v) return;
+      busy = true;
+      foot.hidden = true;
+      say(rc.t.working);
+      rdlg.showModal();
+      const c = config();
+      try {
+        const res = await fetch(rc.url, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: sid, lang: rc.lang, image: v.snapshot(1024, 640), config: { size: c.size, type: c.type, build: c.build, extras: c.extras, wall: c.wall, carpet: c.carpet, accent: c.accent } }),
+        });
+        const r = await res.json() as { success?: boolean; image?: string; reason?: string; left?: number };
+        if (typeof r.left === 'number') leftEl.textContent = rc.t.left.replace('{n}', String(r.left));
+        if (r.success && r.image) {
+          stage.innerHTML = '';
+          const img = new Image();
+          img.src = r.image; img.alt = rc.t.title;
+          stage.append(img);
+          dl.href = r.image;
+          foot.hidden = false;
+        } else say(r.reason === 'limit' ? rc.t.limit : rc.t.fail);
+      } catch {
+        say(rc.t.fail);
+      }
+      busy = false;
+    });
+    rdlg.querySelector('[data-rr-close]')?.addEventListener('click', () => rdlg.close());
+    rdlg.querySelector('[data-rr-use]')?.addEventListener('click', () => {
+      rdlg.close();
+      document.querySelector<HTMLButtonElement>('[data-plan-apply]')?.click();
+    });
+  }
   out.querySelector('[data-stand-save]')?.addEventListener('click', async () => {
     const v = await ensure();
     if (!v) return;

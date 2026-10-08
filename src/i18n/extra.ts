@@ -29,6 +29,8 @@ type Extra = {
     concept: string;
     view3d: string; view2d: string; loading: string; noWebgl: string; drag: string; reset: string; save: string; attached: string;
   };
+  render: { btn: string; title: string; working: string; download: string; use: string; left: string; limit: string; fail: string; note: string; close: string };
+  alerts: { title: string; lead: string; email: string; sectors: string; submit: string; sending: string; ok: string; err: string; missing: string; unsub: string };
   privacy: { link: string; title: string; updated: string; body: { h: string; p: string }[] };
   notFound: { title: string; body: string; home: string };
 };
@@ -83,6 +85,8 @@ const ar: Extra = {
     concept: 'تصور مبدئي، والتصميم النهائي يجهزه فريقنا',
     view3d: 'ثلاثي الأبعاد', view2d: 'المسقط', loading: 'جارٍ تجهيز التصميم ثلاثي الأبعاد…', noWebgl: 'متصفحك لا يدعم العرض ثلاثي الأبعاد، نعرض لك المسقط.', drag: 'اسحب للتدوير، وقرّب بعجلة الماوس أو بإصبعين.', reset: 'الزاوية الافتراضية', save: 'حفظ الصورة', attached: 'سيُرفق تصميمك ثلاثي الأبعاد مع الطلب ليبدأ منه مصممونا.',
   },
+  render: { btn: 'رندر واقعي بالذكاء الاصطناعي', title: 'رندر واقعي لجناحك', working: 'جارٍ تحويل التصور لصورة واقعية… أقل من دقيقة', download: 'تنزيل الصورة', use: 'أكمل الطلب بهذا التصور', left: 'المتبقي اليوم: {n}', limit: 'وصلت للحد اليومي للرندر المجاني. أكمل الطلب ونجهز لك تصميماً كاملاً.', fail: 'تعذّر توليد الصورة الآن. حاول بعد قليل.', note: 'صورة تخيلية بالذكاء الاصطناعي، والتصميم النهائي يجهزه فريقنا.', close: 'إغلاق' },
+  alerts: { title: 'نبّهني بمعارض قطاعي', lead: 'اختر قطاعك ونرسل لك تذكيراً قبل المعرض بشهرين وبثلاثة أسابيع، وقت كافٍ لتجهيز جناحك.', email: 'البريد الإلكتروني', sectors: 'القطاعات', submit: 'اشترك في التنبيهات', sending: 'جارٍ الاشتراك…', ok: 'تم الاشتراك. بنرسل لك التنبيهات على بريدك.', err: 'لم يتم الاشتراك. حاول مرة ثانية.', missing: 'اكتب بريداً صحيحاً واختر قطاعاً واحداً على الأقل.', unsub: 'يمكنك إلغاء الاشتراك من أي رسالة.' },
   privacy: {
     link: 'سياسة الخصوصية',
     title: 'سياسة الخصوصية',
@@ -150,6 +154,8 @@ const en: Extra = {
     concept: 'Initial concept. Our team prepares the final design',
     view3d: '3D', view2d: 'Plan', loading: 'Preparing the 3D design…', noWebgl: 'Your browser can’t show 3D, so here is the plan.', drag: 'Drag to rotate, zoom with the mouse wheel or two fingers.', reset: 'Reset view', save: 'Save image', attached: 'Your 3D design will be attached to the request for our designers to start from.',
   },
+  render: { btn: 'Photoreal AI render', title: 'Photoreal render of your stand', working: 'Turning your concept into a realistic image… under a minute', download: 'Download image', use: 'Continue the request with this concept', left: 'Left today: {n}', limit: 'You reached today’s free render limit. Send the request and our team will prepare a full design.', fail: 'The image could not be generated right now. Try again shortly.', note: 'AI impression only; the final design is prepared by our team.', close: 'Close' },
+  alerts: { title: 'Alert me about shows in my sector', lead: 'Pick your sectors and we email you two months and three weeks before each show, enough time to prepare your stand.', email: 'Email', sectors: 'Sectors', submit: 'Subscribe to alerts', sending: 'Subscribing…', ok: 'You are subscribed. Alerts will arrive in your inbox.', err: 'Subscription failed. Please try again.', missing: 'Enter a valid email and pick at least one sector.', unsub: 'Unsubscribe from any email.' },
   privacy: {
     link: 'Privacy policy',
     title: 'Privacy policy',
@@ -217,6 +223,8 @@ const de: Extra = {
     concept: 'Erster Entwurf. Das finale Design erstellt unser Team',
     view3d: '3D', view2d: 'Grundriss', loading: '3D-Entwurf wird vorbereitet…', noWebgl: 'Ihr Browser kann kein 3D anzeigen, hier ist der Grundriss.', drag: 'Ziehen zum Drehen, Zoom mit Mausrad oder zwei Fingern.', reset: 'Ansicht zurücksetzen', save: 'Bild speichern', attached: 'Ihr 3D-Entwurf wird der Anfrage beigefügt, damit unsere Designer darauf aufbauen.',
   },
+  render: { btn: 'Fotorealistisches KI-Rendering', title: 'Fotorealistisches Rendering Ihres Stands', working: 'Ihr Konzept wird zum realistischen Bild… unter einer Minute', download: 'Bild herunterladen', use: 'Anfrage mit diesem Konzept fortsetzen', left: 'Heute übrig: {n}', limit: 'Das heutige Gratis-Limit ist erreicht. Senden Sie die Anfrage, unser Team erstellt ein vollständiges Design.', fail: 'Das Bild konnte gerade nicht erstellt werden. Bitte gleich erneut versuchen.', note: 'Nur ein KI-Eindruck; das finale Design erstellt unser Team.', close: 'Schließen' },
+  alerts: { title: 'Messe-Alarm für meine Branche', lead: 'Wählen Sie Ihre Branchen; wir schreiben Ihnen zwei Monate und drei Wochen vor jeder Messe, genug Zeit für Ihren Stand.', email: 'E-Mail', sectors: 'Branchen', submit: 'Alarme abonnieren', sending: 'Wird abonniert…', ok: 'Abonniert. Die Hinweise kommen per E-Mail.', err: 'Abonnement fehlgeschlagen. Bitte erneut versuchen.', missing: 'Gültige E-Mail eingeben und mindestens eine Branche wählen.', unsub: 'Abmeldung in jeder E-Mail möglich.' },
   privacy: {
     link: 'Datenschutz',
     title: 'Datenschutzerklärung',
@@ -284,6 +292,8 @@ const fr: Extra = {
     concept: 'Esquisse initiale. Notre équipe prépare la conception finale',
     view3d: '3D', view2d: 'Plan', loading: 'Préparation de la vue 3D…', noWebgl: 'Votre navigateur ne peut pas afficher la 3D, voici le plan.', drag: 'Faites glisser pour tourner, zoomez à la molette ou à deux doigts.', reset: 'Vue par défaut', save: 'Enregistrer l’image', attached: 'Votre conception 3D sera jointe à la demande pour servir de base à nos designers.',
   },
+  render: { btn: 'Rendu IA photoréaliste', title: 'Rendu photoréaliste de votre stand', working: 'Transformation de votre concept en image réaliste… moins d’une minute', download: 'Télécharger l’image', use: 'Continuer la demande avec ce concept', left: 'Restant aujourd’hui : {n}', limit: 'Limite gratuite du jour atteinte. Envoyez la demande et notre équipe préparera un design complet.', fail: 'Impossible de générer l’image pour le moment. Réessayez bientôt.', note: 'Simple aperçu IA ; le design final est préparé par notre équipe.', close: 'Fermer' },
+  alerts: { title: 'Alertes salons de mon secteur', lead: 'Choisissez vos secteurs : nous vous écrivons deux mois et trois semaines avant chaque salon, le temps de préparer votre stand.', email: 'E-mail', sectors: 'Secteurs', submit: 'S’abonner aux alertes', sending: 'Abonnement…', ok: 'Abonnement confirmé. Les alertes arriveront par e-mail.', err: 'L’abonnement a échoué. Réessayez.', missing: 'Saisissez un e-mail valide et choisissez au moins un secteur.', unsub: 'Désabonnement possible depuis chaque e-mail.' },
   privacy: {
     link: 'Confidentialité',
     title: 'Politique de confidentialité',
@@ -351,6 +361,8 @@ const ru: Extra = {
     concept: 'Предварительный эскиз. Финальный проект готовит наша команда',
     view3d: '3D', view2d: 'План', loading: 'Готовим 3D-модель…', noWebgl: 'Ваш браузер не поддерживает 3D, показываем план.', drag: 'Перетаскивайте для вращения, масштаб — колесом мыши или двумя пальцами.', reset: 'Исходный вид', save: 'Сохранить изображение', attached: 'Ваш 3D-проект будет приложен к запросу, чтобы дизайнеры начали с него.',
   },
+  render: { btn: 'Фотореалистичный ИИ-рендер', title: 'Фотореалистичный рендер вашего стенда', working: 'Превращаем концепт в реалистичное изображение… меньше минуты', download: 'Скачать изображение', use: 'Продолжить заявку с этим концептом', left: 'Осталось сегодня: {n}', limit: 'Дневной лимит бесплатных рендеров исчерпан. Отправьте заявку, и наша команда подготовит полный дизайн.', fail: 'Сейчас не удалось создать изображение. Попробуйте чуть позже.', note: 'Это лишь ИИ-визуализация; финальный дизайн готовит наша команда.', close: 'Закрыть' },
+  alerts: { title: 'Уведомления о выставках моей отрасли', lead: 'Выберите отрасли, и мы напишем вам за два месяца и за три недели до выставки — достаточно, чтобы подготовить стенд.', email: 'E-mail', sectors: 'Отрасли', submit: 'Подписаться', sending: 'Подписываем…', ok: 'Подписка оформлена. Уведомления придут на почту.', err: 'Не удалось подписаться. Попробуйте ещё раз.', missing: 'Введите корректный e-mail и выберите хотя бы одну отрасль.', unsub: 'Отписаться можно из любого письма.' },
   privacy: {
     link: 'Конфиденциальность',
     title: 'Политика конфиденциальности',

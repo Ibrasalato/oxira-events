@@ -1,12 +1,13 @@
 ---
 import events from '../i18n/events.json';
 import { x } from '../i18n/extra';
-import type { Lang } from '../i18n/content';
+import { N8N, type Lang } from '../i18n/content';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const p = x[lang].planner;
 const a = x[lang].ar3d;
+const rr = x[lang].render;
 const SIZES = [9, 18, 36, 54, 72, 100];
 const evName = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? ev.name_ar : ev.name);
 ---
@@ -161,12 +162,29 @@ const evName = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? e
           <p class="pl-out-t">{p.summary}</p>
           <p class="pl-sum" data-plan-summary></p>
           <button type="button" class="btn btn-amber" data-plan-apply>{p.apply}</button>
+          <button type="button" class="btn btn-ghost pl-render-btn" data-stand-render>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z M19 15l.8 2.2 2.2.8-2.2.8L19 21l-.8-2.2-2.2-.8 2.2-.8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            {rr.btn}
+          </button>
           <p class="pl-note" data-plan-note role="status"></p>
         </div>
       </aside>
     </div>
   </div>
 </section>
+
+<dialog class="ar-dialog rr-dialog" data-render-dialog aria-labelledby="rr-title" data-cfg={JSON.stringify({ url: N8N.boothRender, lang, t: rr })}>
+  <div class="ar-head">
+    <p id="rr-title">{rr.title}</p>
+    <button type="button" class="ar-x" data-rr-close aria-label={rr.close}>×</button>
+  </div>
+  <div class="rr-stage" data-rr-stage><p class="rr-status" data-rr-status>{rr.working}</p></div>
+  <p class="rr-note">{rr.note} <span data-rr-left></span></p>
+  <div class="rr-foot" data-rr-foot hidden>
+    <a class="btn btn-ghost" data-rr-dl download="oxira-events-stand-render.jpg">{rr.download}</a>
+    <button type="button" class="btn btn-amber" data-rr-use>{rr.use}</button>
+  </div>
+</dialog>
 
 <dialog class="ar-dialog" data-ar-dialog aria-labelledby="ar-title" data-txt={JSON.stringify(a)}>
   <div class="ar-head">
@@ -421,4 +439,15 @@ const evName = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? e
     .seg-wrap .seg-opt + .seg-opt { border-inline-start: 0; border-top: 1px solid var(--line); }
     .types { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
+  .rr-dialog { padding-bottom: 1rem; }
+  .rr-stage, .rr-note, .rr-foot { margin-inline: 1rem; }
+  .rr-stage { margin-top: 1rem; }
+  .pl-render-btn { margin-top: .6rem; width: 100%; gap: .45rem; }
+  .pl-render-btn svg { width: 18px; height: 18px; }
+  .rr-stage { position: relative; aspect-ratio: 3 / 2; background: var(--paper); border-radius: 12px; overflow: hidden; display: grid; place-items: center; }
+  .rr-stage img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .rr-status { padding: 1rem; text-align: center; color: var(--ink-2); }
+  .rr-note { font-size: .85rem; color: var(--ink-2); margin-top: .6rem; }
+  .rr-foot { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .8rem; }
+  .rr-foot[hidden] { display: none; }
 </style>

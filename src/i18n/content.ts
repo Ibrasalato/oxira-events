@@ -16,6 +16,8 @@ export const N8N = {
   chat: 'https://ibrasalato.app.n8n.cloud/webhook/oxira-events-chat',
   form: 'https://ibrasalato.app.n8n.cloud/webhook/oxira-events-contact',
   booking: 'https://ibrasalato.app.n8n.cloud/webhook/oxira-events-booking',
+  boothRender: 'https://ibrasalato.app.n8n.cloud/webhook/oxira-events-booth-render',
+  alerts: 'https://ibrasalato.app.n8n.cloud/webhook/oxira-events-alerts',
 };
 
 export const CONTACT = {
