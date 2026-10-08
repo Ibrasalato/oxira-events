@@ -1,0 +1,157 @@
+---
+// Consultation booking: pick a working day (Sun–Thu) and a 30-minute slot, Riyadh time.
+import { x } from '../i18n/extra';
+import { N8N, CONTACT, type Lang } from '../i18n/content';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const b = x[lang].book;
+const locale = { ar: 'ar-u-nu-latn', en: 'en-GB', de: 'de-DE', fr: 'fr-FR', ru: 'ru-RU' }[lang];
+---
+<form class="quote book cut" data-book novalidate hidden>
+  <p class="book-lead">{b.lead}</p>
+
+  <fieldset class="book-set">
+    <legend>{b.day}</legend>
+    <div class="days" data-days role="radiogroup"></div>
+  </fieldset>
+
+  <fieldset class="book-set">
+    <legend>{b.time} <span class="tz">({b.tz})</span></legend>
+    <div class="slots" data-slots role="radiogroup"><p class="slots-empty">{b.pickSlot}</p></div>
+  </fieldset>
+
+  <fieldset class="book-set">
+    <legend>{b.channel}</legend>
+    <div class="chans">
+      {b.channels.map((c, i) => (
+        <label class="chan"><input type="radio" name="channel" value={c.id} checked={i === 0} /><span>{c.t}</span></label>
+      ))}
+    </div>
+  </fieldset>
+
+  <div class="f-row">
+    <label class="f"><span>{b.name} *</span><input name="name" autocomplete="name" required maxlength="120" /></label>
+    <label class="f"><span>{b.phone} *</span><input name="phone" type="tel" autocomplete="tel" dir="ltr" required maxlength="40" /></label>
+  </div>
+  <div class="f-row">
+    <label class="f"><span>{b.email}</span><input name="email" type="email" autocomplete="email" dir="ltr" maxlength="160" placeholder={b.emailHint} /></label>
+    <label class="f"><span>{b.company}</span><input name="company" autocomplete="organization" maxlength="160" /></label>
+  </div>
+  <label class="f"><span>{b.topic}</span><textarea name="topic" rows="3" maxlength="2000" placeholder={b.topicHint}></textarea></label>
+  <label class="hp" aria-hidden="true">Website<input name="company_website" tabindex="-1" autocomplete="off" /></label>
+  <div class="f-actions">
+    <button class="btn btn-amber" type="submit" data-label={b.submit} data-sending={b.sending}>{b.submit}</button>
+    <p class="f-status" role="status" aria-live="polite" data-book-status></p>
+  </div>
+</form>
+
+<script is:inline define:vars={{ B: b, lang, locale, url: N8N.booking, wa: CONTACT.whatsapp }}>
+(() => {
+  const form = document.querySelector('[data-book]');
+  if (!form) return;
+  const daysEl = form.querySelector('[data-days]');
+  const slotsEl = form.querySelector('[data-slots]');
+  const status = form.querySelector('[data-book-status]');
+  const TZ = 'Asia/Riyadh';
+  const ymd = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' });
+  const wd = new Intl.DateTimeFormat('en-US', { timeZone: TZ, weekday: 'short' });
+  const hm = new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hour12: false });
+  const dayLabel = new Intl.DateTimeFormat(locale, { timeZone: TZ, weekday: 'short' });
+  const dateLabel = new Intl.DateTimeFormat(locale, { timeZone: TZ, day: 'numeric', month: 'short' });
+  const SLOTS = [];
+  for (let m = 600; m <= 990; m += 30) SLOTS.push(String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'));
+
+  // Next 10 working days (Sun–Thu) in Riyadh, today included while slots remain.
+  const now = new Date();
+  const soon = new Date(now.getTime() + 60 * 60 * 1000);
+  const todayYmd = ymd.format(now), soonHm = hm.format(soon), soonYmd = ymd.format(soon);
+  const days = [];
+  for (let i = 0; days.length < 10 && i < 21; i++) {
+    const d = new Date(now.getTime() + i * 86400000);
+    const w = wd.format(d);
+    if (w === 'Fri' || w === 'Sat') continue;
+    const key = ymd.format(d);
+    const free = SLOTS.filter((s) => key > soonYmd || (key === soonYmd && s > soonHm));
+    if (!free.length) continue;
+    days.push({ key, d, free });
+  }
+  days.forEach((day, i) => {
+    const l = document.createElement('label');
+    l.className = 'day';
+    l.innerHTML = '<input type="radio" name="date"><span><b></b><i></i></span>';
+    const inp = l.querySelector('input');
+    inp.value = day.key;
+    l.querySelector('b').textContent = dayLabel.format(day.d);
+    l.querySelector('i').textContent = dateLabel.format(day.d);
+    inp.addEventListener('change', () => renderSlots(day));
+    daysEl.append(l);
+  });
+  function renderSlots(day) {
+    slotsEl.innerHTML = '';
+    day.free.forEach((s) => {
+      const l = document.createElement('label');
+      l.className = 'slot';
+      l.innerHTML = '<input type="radio" name="time"><span dir="ltr"></span>';
+      l.querySelector('input').value = s;
+      l.querySelector('span').textContent = s;
+      slotsEl.append(l);
+    });
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(form).entries());
+    if (!d.date || !d.time || !String(d.name || '').trim() || !String(d.phone || '').trim()) {
+      status.textContent = B.missing; status.className = 'f-status is-err'; return;
+    }
+    const btn = form.querySelector('[type=submit]');
+    btn.disabled = true; btn.textContent = btn.dataset.sending; status.textContent = ''; status.className = 'f-status';
+    try {
+      const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...d, lang, page: location.pathname }) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.success) throw new Error('fail');
+      form.reset();
+      slotsEl.innerHTML = '';
+      status.textContent = B.ok + ' ' + (j.id ?? '') + '. ' + B.okTail;
+      status.className = 'f-status is-ok';
+    } catch {
+      status.innerHTML = '';
+      status.append(B.err + ' ');
+      const a = document.createElement('a'); a.href = wa; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'WhatsApp';
+      status.append(a);
+      status.className = 'f-status is-err';
+    } finally {
+      btn.disabled = false; btn.textContent = btn.dataset.label;
+    }
+  });
+})();
+</script>
+
+<style is:global>
+  .book-lead { color: var(--ink-2); font-size: .98rem; }
+  .book-set { border: 0; margin: 0; padding: 0; min-width: 0; }
+  .book-set legend { font-size: .88rem; font-weight: 600; color: var(--ink-2); margin-bottom: .45rem; padding: 0; }
+  .book-set .tz { font-weight: 400; }
+  .days { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .4rem; }
+  .day, .slot, .chan { position: relative; }
+  .day input, .slot input, .chan input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+  .day span { display: grid; place-items: center; gap: .05rem; padding: .45rem .2rem; border: 1px solid var(--line); background: var(--paper); text-align: center; line-height: 1.3; }
+  .day b { font-size: .82rem; font-weight: 700; }
+  .day i { font-style: normal; font-size: .78rem; color: var(--ink-2); }
+  .slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(4.4rem, 1fr)); gap: .4rem; }
+  .slot span { display: block; padding: .5rem .2rem; border: 1px solid var(--line); background: var(--paper); text-align: center; font-size: .9rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .slots-empty { grid-column: 1 / -1; color: var(--ink-2); font-size: .88rem; }
+  .chans { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .chan span { display: inline-block; padding: .45rem .8rem; border: 1px solid var(--line); background: var(--paper); font-size: .9rem; }
+  .day input:checked + span, .slot input:checked + span, .chan input:checked + span { background: var(--navy); border-color: var(--navy); color: #fff; }
+  .day input:checked + span i { color: #B9CBE0; }
+  .day input:focus-visible + span, .slot input:focus-visible + span, .chan input:focus-visible + span { outline: 3px solid var(--amber); outline-offset: 2px; }
+  .cf-tabs { display: flex; gap: .3rem; margin-bottom: -1px; position: relative; z-index: 1; flex-wrap: wrap; }
+  .cf-tabs button { border: 0; background: rgba(255,255,255,.12); color: #fff; font: inherit; font-weight: 700; font-size: .95rem; padding: .7rem 1.1rem; cursor: pointer; }
+  .cf-tabs button[aria-selected="true"] { background: #fff; color: var(--navy); }
+  .cf-tabs button:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+  .contact-forms .quote { clip-path: none; }
+  .book-link { display: inline-block; margin-top: 1rem; border: 0; background: none; padding: 0; font: inherit; font-weight: 700; color: var(--amber); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+  @media (max-width: 560px) { .days { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+</style>

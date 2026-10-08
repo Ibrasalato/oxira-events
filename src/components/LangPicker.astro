@@ -22,7 +22,7 @@ const label: Record<Lang, string> = { ar: 'اللغة', en: 'Language', de: 'Spr
       <li>
         <a href={`${base}${langPath(l.code)}${rel}`} hreflang={l.code} lang={l.code} aria-current={l.code === lang ? 'true' : undefined}>
           <img class="lp-flag" src={`${base}/flags/${l.flag}.svg`} alt="" width="20" height="15" loading="lazy" />
-          <span>{l.name}</span>
+          <span class={l.code !== lang && (l.code === 'ru' || lang === 'ru') ? 'lp-sys' : undefined}>{l.name}</span>
         </a>
       </li>
     ))}
@@ -76,4 +76,5 @@ const label: Record<Lang, string> = { ar: 'اللغة', en: 'Language', de: 'Spr
     .lp-name { display: none; }
     .lp-code { display: inline; }
   }
+  .lp-sys { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
 </style>

@@ -15,6 +15,7 @@ export const langPath = (l: Lang) => (l === 'ar' ? '/' : `/${l}/`);
 export const N8N = {
   chat: 'https://ibrasalato.app.n8n.cloud/webhook/oxira-events-chat',
   form: 'https://ibrasalato.app.n8n.cloud/webhook/oxira-events-contact',
+  booking: 'https://ibrasalato.app.n8n.cloud/webhook/oxira-events-booking',
 };
 
 export const CONTACT = {

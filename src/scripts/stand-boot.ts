@@ -147,6 +147,53 @@ export function boot() {
     a.click();
   });
 
+
+  // AR: show the current stand at real size in the visitor's space (Quick Look on iPhone, WebXR / Scene Viewer on Android).
+  const dlg = document.querySelector<HTMLDialogElement>('[data-ar-dialog]');
+  const arTxt = dlg ? JSON.parse(dlg.dataset.txt || '{}') : {};
+  let arUrl = '';
+  document.querySelector('[data-stand-ar]')?.addEventListener('click', async () => {
+    if (!dlg) return;
+    const stage = dlg.querySelector<HTMLElement>('[data-ar-stage]')!;
+    const hint = dlg.querySelector<HTMLElement>('[data-ar-hint]')!;
+    stage.querySelectorAll('model-viewer').forEach((m) => m.remove());
+    stage.querySelector<HTMLElement>('[data-ar-status]')!.hidden = false;
+    hint.textContent = '';
+    dlg.showModal();
+    const v = await ensure();
+    if (!v) { hint.textContent = arTxt.unsupported; return; }
+    v.update(config());
+    const [glb] = await Promise.all([v.exportGLB(), import('@google/model-viewer')]);
+    if (arUrl) URL.revokeObjectURL(arUrl);
+    arUrl = URL.createObjectURL(new Blob([glb], { type: 'model/gltf-binary' }));
+    const mv = document.createElement('model-viewer') as HTMLElement & { canActivateAR?: boolean };
+    mv.setAttribute('src', arUrl);
+    mv.setAttribute('alt', arTxt.title);
+    mv.setAttribute('ar', '');
+    mv.setAttribute('ar-modes', 'webxr scene-viewer quick-look');
+    mv.setAttribute('ar-scale', 'fixed');
+    mv.setAttribute('ar-placement', 'floor');
+    mv.setAttribute('camera-controls', '');
+    mv.setAttribute('touch-action', 'pan-y');
+    mv.setAttribute('shadow-intensity', '1');
+    mv.setAttribute('environment-image', 'neutral');
+    mv.setAttribute('camera-orbit', '35deg 65deg auto');
+    const btn = document.createElement('button');
+    btn.slot = 'ar-button';
+    btn.className = 'ar-place';
+    btn.type = 'button';
+    btn.textContent = arTxt.place;
+    mv.append(btn);
+    mv.addEventListener('load', () => {
+      stage.querySelector<HTMLElement>('[data-ar-status]')!.hidden = true;
+      const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      hint.textContent = mv.canActivateAR ? arTxt.hint : mobile ? arTxt.unsupported : arTxt.desktop;
+    }, { once: true });
+    stage.append(mv);
+  });
+  dlg?.querySelector('[data-ar-close]')?.addEventListener('click', () => dlg.close());
+  dlg?.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+
   // Called by the quote form on submit (only when the visitor applied the planner outline).
   window.__standExport = async () => {
     const v = await ensure();

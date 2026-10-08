@@ -2,6 +2,13 @@ import type { Lang } from './content';
 
 // Copy for the exhibitions calendar, the stand planner, the privacy page and the 404 page.
 type Extra = {
+  book: {
+    tabQuote: string; tabBook: string; lead: string; day: string; time: string; tz: string; channel: string;
+    channels: { id: string; t: string }[]; topic: string; topicHint: string; name: string; phone: string; email: string; emailHint: string; company: string;
+    submit: string; sending: string; ok: string; okTail: string; err: string; missing: string; pickSlot: string; link: string;
+  };
+  profile: { download: string; size: string };
+  ar3d: { open: string; title: string; place: string; hint: string; desktop: string; unsupported: string; close: string; loading: string };
   cta: { design3d: string; navPlanner: string; orChat: string };
   cal: {
     title: string; lead: string; plan: string; site: string; more: string; less: string; source: string;
@@ -27,6 +34,9 @@ type Extra = {
 };
 
 const ar: Extra = {
+  book: { tabQuote: 'اطلب عرض سعر', tabBook: 'احجز مكالمة استشارة', lead: 'اختر وقتاً يناسبك لمكالمة 30 دقيقة مع فريقنا. الموعد مبدئي ونؤكده معك.', day: 'اليوم', time: 'الوقت', tz: 'بتوقيت الرياض', channel: 'طريقة التواصل', channels: [{ id: 'call', t: 'مكالمة هاتفية' }, { id: 'whatsapp', t: 'واتساب' }, { id: 'video', t: 'اجتماع فيديو' }, { id: 'visit', t: 'زيارة مكتبنا' }], topic: 'عن ماذا تريد أن نتحدث؟', topicHint: 'اسم المعرض، المساحة، أي فكرة لديك', name: 'الاسم', phone: 'الجوال', email: 'البريد الإلكتروني', emailHint: 'لنرسل لك دعوة التقويم', company: 'الجهة أو الشركة', submit: 'احجز الموعد', sending: 'جارٍ الحجز…', ok: 'تم تسجيل طلب الموعد رقم', okTail: 'سنؤكده معك قريباً، وأرسلنا دعوة التقويم إلى بريدك إن كتبته.', err: 'لم يُحجز الموعد. اختر وقتاً آخر أو راسلنا على واتساب.', missing: 'اختر اليوم والوقت، واكتب الاسم ورقم الجوال.', pickSlot: 'اختر يوماً لعرض الأوقات المتاحة.', link: 'أو احجز مكالمة استشارة' },
+  profile: { download: 'حمّل الملف التعريفي', size: 'PDF' },
+  ar3d: { open: 'شاهده في مكانك (AR)', title: 'جناحك في مكانك الحقيقي', place: 'ضع الجناح في مكانك', hint: 'وجّه كاميرا الجوال إلى الأرض، ثم ضع الجناح بحجمه الحقيقي وتجوّل حوله.', desktop: 'افتح هذه الصفحة من جوالك (آيفون أو أندرويد) لتشاهد جناحك بالواقع المعزز بحجمه الحقيقي.', unsupported: 'جهازك لا يدعم الواقع المعزز، ويمكنك تدوير الجناح هنا.', close: 'إغلاق', loading: 'جارٍ تجهيز الجناح…' },
   cta: { design3d: 'صمّم جناحك ثلاثي الأبعاد', navPlanner: 'صمّم جناحك', orChat: 'أو تحدث مع المساعد الذكي' },
   cal: {
     title: 'معارض قادمة في السعودية',
@@ -91,6 +101,9 @@ const ar: Extra = {
 };
 
 const en: Extra = {
+  book: { tabQuote: 'Request a quote', tabBook: 'Book a consultation call', lead: 'Pick a time for a 30-minute call with our team. The slot is provisional and we confirm it with you.', day: 'Day', time: 'Time', tz: 'Riyadh time', channel: 'How we connect', channels: [{ id: 'call', t: 'Phone call' }, { id: 'whatsapp', t: 'WhatsApp' }, { id: 'video', t: 'Video meeting' }, { id: 'visit', t: 'Visit our office' }], topic: 'What would you like to discuss?', topicHint: 'Exhibition name, stand size, any ideas', name: 'Name', phone: 'Mobile', email: 'Email', emailHint: 'so we can send you the calendar invite', company: 'Company', submit: 'Book the call', sending: 'Booking…', ok: 'Consultation request received. Number', okTail: 'We will confirm it with you soon; the calendar invite is in your inbox if you added an email.', err: 'The call wasn\'t booked. Pick another time or message us on WhatsApp.', missing: 'Pick a day and time, and add your name and mobile.', pickSlot: 'Pick a day to see the available times.', link: 'or book a consultation call' },
+  profile: { download: 'Download company profile', size: 'PDF' },
+  ar3d: { open: 'View in your space (AR)', title: 'Your stand in your real space', place: 'Place the stand', hint: 'Point your phone at the floor, place the stand at real size and walk around it.', desktop: 'Open this page on your phone (iPhone or Android) to see your stand at real size in augmented reality.', unsupported: 'Your device doesn\'t support AR; you can still rotate the stand here.', close: 'Close', loading: 'Preparing your stand…' },
   cta: { design3d: 'Design your stand in 3D', navPlanner: 'Design your stand', orChat: 'or chat with our AI assistant' },
   cal: {
     title: 'Upcoming exhibitions in Saudi Arabia',
@@ -155,6 +168,9 @@ const en: Extra = {
 };
 
 const de: Extra = {
+  book: { tabQuote: 'Angebot anfragen', tabBook: 'Beratungsgespräch buchen', lead: 'Wählen Sie einen Termin für ein 30-minütiges Gespräch. Der Termin ist vorläufig, wir bestätigen ihn mit Ihnen.', day: 'Tag', time: 'Uhrzeit', tz: 'Ortszeit Riad', channel: 'Kontaktweg', channels: [{ id: 'call', t: 'Telefonat' }, { id: 'whatsapp', t: 'WhatsApp' }, { id: 'video', t: 'Videomeeting' }, { id: 'visit', t: 'Besuch im Büro' }], topic: 'Worüber möchten Sie sprechen?', topicHint: 'Messe, Standgröße, Ihre Ideen', name: 'Name', phone: 'Mobilnummer', email: 'E-Mail', emailHint: 'für die Kalendereinladung', company: 'Unternehmen', submit: 'Termin buchen', sending: 'Wird gebucht…', ok: 'Terminanfrage erhalten. Nummer', okTail: 'Wir bestätigen den Termin in Kürze; die Kalendereinladung liegt in Ihrem Postfach, falls Sie eine E-Mail angegeben haben.', err: 'Der Termin wurde nicht gebucht. Wählen Sie eine andere Zeit oder schreiben Sie uns auf WhatsApp.', missing: 'Bitte Tag, Uhrzeit, Name und Mobilnummer angeben.', pickSlot: 'Wählen Sie einen Tag, um freie Zeiten zu sehen.', link: 'oder Beratungsgespräch buchen' },
+  profile: { download: 'Unternehmensprofil herunterladen', size: 'PDF' },
+  ar3d: { open: 'In Ihrem Raum ansehen (AR)', title: 'Ihr Stand in Ihrem echten Raum', place: 'Stand platzieren', hint: 'Richten Sie die Kamera auf den Boden, platzieren Sie den Stand in Originalgröße und gehen Sie herum.', desktop: 'Öffnen Sie diese Seite auf Ihrem Smartphone (iPhone oder Android), um Ihren Stand in Originalgröße in AR zu sehen.', unsupported: 'Ihr Gerät unterstützt kein AR; Sie können den Stand hier drehen.', close: 'Schließen', loading: 'Stand wird vorbereitet…' },
   cta: { design3d: 'Stand in 3D gestalten', navPlanner: 'Stand gestalten', orChat: 'oder mit unserem KI-Assistenten chatten' },
   cal: {
     title: 'Kommende Messen in Saudi-Arabien',
@@ -219,6 +235,9 @@ const de: Extra = {
 };
 
 const fr: Extra = {
+  book: { tabQuote: 'Demander un devis', tabBook: 'Réserver un appel conseil', lead: 'Choisissez un créneau pour un appel de 30 minutes. Le créneau est provisoire et nous le confirmons avec vous.', day: 'Jour', time: 'Heure', tz: 'heure de Riyad', channel: 'Moyen de contact', channels: [{ id: 'call', t: 'Appel téléphonique' }, { id: 'whatsapp', t: 'WhatsApp' }, { id: 'video', t: 'Visioconférence' }, { id: 'visit', t: 'Visite de nos bureaux' }], topic: 'De quoi souhaitez-vous parler ?', topicHint: 'Nom du salon, surface, vos idées', name: 'Nom', phone: 'Mobile', email: 'E-mail', emailHint: 'pour recevoir l’invitation de calendrier', company: 'Société', submit: 'Réserver l’appel', sending: 'Réservation…', ok: 'Demande de rendez-vous reçue. Numéro', okTail: 'Nous vous la confirmerons rapidement ; l’invitation de calendrier est dans votre boîte si vous avez indiqué un e-mail.', err: 'Le rendez-vous n’a pas été réservé. Choisissez un autre créneau ou écrivez-nous sur WhatsApp.', missing: 'Choisissez le jour et l’heure, et indiquez votre nom et votre mobile.', pickSlot: 'Choisissez un jour pour voir les créneaux disponibles.', link: 'ou réservez un appel conseil' },
+  profile: { download: 'Télécharger la présentation', size: 'PDF' },
+  ar3d: { open: 'Voir chez vous (RA)', title: 'Votre stand dans votre espace réel', place: 'Placer le stand', hint: 'Visez le sol avec votre téléphone, placez le stand à taille réelle et tournez autour.', desktop: 'Ouvrez cette page sur votre téléphone (iPhone ou Android) pour voir votre stand à taille réelle en réalité augmentée.', unsupported: 'Votre appareil ne prend pas en charge la RA ; vous pouvez faire pivoter le stand ici.', close: 'Fermer', loading: 'Préparation du stand…' },
   cta: { design3d: 'Concevez votre stand en 3D', navPlanner: 'Concevoir mon stand', orChat: 'ou discutez avec notre assistant IA' },
   cal: {
     title: 'Salons à venir en Arabie saoudite',
@@ -283,6 +302,9 @@ const fr: Extra = {
 };
 
 const ru: Extra = {
+  book: { tabQuote: 'Запросить смету', tabBook: 'Записаться на консультацию', lead: 'Выберите время для 30-минутного звонка с нашей командой. Время предварительное, мы подтвердим его.', day: 'День', time: 'Время', tz: 'время Эр-Рияда', channel: 'Способ связи', channels: [{ id: 'call', t: 'Телефонный звонок' }, { id: 'whatsapp', t: 'WhatsApp' }, { id: 'video', t: 'Видеовстреча' }, { id: 'visit', t: 'Визит в офис' }], topic: 'Что хотите обсудить?', topicHint: 'Название выставки, площадь, ваши идеи', name: 'Имя', phone: 'Мобильный', email: 'E-mail', emailHint: 'чтобы отправить приглашение в календарь', company: 'Компания', submit: 'Записаться', sending: 'Записываем…', ok: 'Запрос на консультацию получен. Номер', okTail: 'Мы скоро подтвердим время; приглашение для календаря отправлено на почту, если вы её указали.', err: 'Запись не создана. Выберите другое время или напишите нам в WhatsApp.', missing: 'Выберите день и время, укажите имя и мобильный.', pickSlot: 'Выберите день, чтобы увидеть свободное время.', link: 'или запишитесь на консультацию' },
+  profile: { download: 'Скачать профиль компании', size: 'PDF' },
+  ar3d: { open: 'Посмотреть у себя (AR)', title: 'Ваш стенд в реальном пространстве', place: 'Разместить стенд', hint: 'Наведите камеру на пол, разместите стенд в натуральную величину и обойдите его.', desktop: 'Откройте эту страницу на телефоне (iPhone или Android), чтобы увидеть стенд в натуральную величину в дополненной реальности.', unsupported: 'Ваше устройство не поддерживает AR; стенд можно вращать здесь.', close: 'Закрыть', loading: 'Готовим стенд…' },
   cta: { design3d: 'Создайте стенд в 3D', navPlanner: 'Создать стенд', orChat: 'или напишите нашему ИИ-ассистенту' },
   cal: {
     title: 'Ближайшие выставки в Саудовской Аравии',

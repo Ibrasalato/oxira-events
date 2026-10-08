@@ -6,6 +6,7 @@ import type { Lang } from '../i18n/content';
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const p = x[lang].planner;
+const a = x[lang].ar3d;
 const SIZES = [9, 18, 36, 54, 72, 100];
 const evName = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? ev.name_ar : ev.name);
 ---
@@ -146,6 +147,10 @@ const evName = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? e
             <span class="pl-3d-actions">
               <button type="button" data-stand-reset>{p.reset}</button>
               <button type="button" data-stand-save>{p.save}</button>
+              <button type="button" class="ar-btn" data-stand-ar>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 20 7.4v9.2L12 21.2 4 16.6V7.4z M4 7.4l8 4.6 8-4.6 M12 12v9.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+                {a.open}
+              </button>
             </span>
           </div>
         </div>
@@ -162,6 +167,15 @@ const evName = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? e
     </div>
   </div>
 </section>
+
+<dialog class="ar-dialog" data-ar-dialog aria-labelledby="ar-title" data-txt={JSON.stringify(a)}>
+  <div class="ar-head">
+    <p id="ar-title">{a.title}</p>
+    <button type="button" class="ar-x" data-ar-close aria-label={a.close}>×</button>
+  </div>
+  <div class="ar-stage" data-ar-stage><p class="ar-status" data-ar-status>{a.loading}</p></div>
+  <p class="ar-hint" data-ar-hint></p>
+</dialog>
 
 <script is:inline define:vars={{ P: p, lang }}>
 (() => {
@@ -313,11 +327,11 @@ const evName = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? e
   .checks { display: flex; flex-wrap: wrap; gap: .5rem; }
   .check { position: relative; }
   .check span { display: inline-block; padding: .55rem .9rem; border: 1px solid var(--line); background: #fff; font-size: .92rem; cursor: pointer; }
-  .check input:checked + span { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .check input:checked + span { background: var(--blue); border-color: var(--blue-text); color: #fff; }
   .pl-event { display: grid; grid-template-columns: minmax(0, 1fr); gap: .45rem; font-weight: 700; }
   .pl-event select { width: 100%; min-width: 0; font-weight: 400; border: 1px solid var(--line); background: #fff; padding: .7rem .8rem; min-height: 3rem; font: inherit; }
   .pl-out { position: sticky; top: 5.5rem; background: #fff; border: 1px solid var(--line); padding: 1.5rem; display: grid; gap: .9rem; }
-  .pl-out-t { font-size: .85rem; font-weight: 700; color: var(--blue); }
+  .pl-out-t { font-size: .85rem; font-weight: 700; color: var(--blue-text); }
   .pl-draw svg { width: 100%; height: auto; display: block; }
   .look { display: grid; gap: 1rem; background: #fff; border: 1px solid var(--line); padding: 1rem 1.1rem; }
   .look-row { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); align-items: center; gap: .6rem 1rem; }
@@ -342,7 +356,7 @@ const evName = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? e
   .logo-thumb { display: inline-grid; place-items: center; width: 3.2rem; height: 2.2rem; background: var(--mist); border: 1px solid var(--line); }
   .logo-thumb[hidden], .logo-clear[hidden] { display: none; }
   .logo-thumb :global(img) { max-width: 90%; max-height: 90%; }
-  .logo-clear { border: 0; background: none; color: var(--blue); font: inherit; font-size: .85rem; font-weight: 600; cursor: pointer; text-decoration: underline; }
+  .logo-clear { border: 0; background: none; color: var(--blue-text); font: inherit; font-size: .85rem; font-weight: 600; cursor: pointer; text-decoration: underline; }
   .pl-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--line); }
   .pl-tabs button { border: 0; background: none; font: inherit; font-weight: 700; font-size: .9rem; padding: .5rem .9rem; color: var(--ink-2); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px; }
   .pl-tabs button[aria-selected="true"] { color: var(--navy); border-color: var(--amber); }
@@ -356,9 +370,23 @@ const evName = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? e
   .pl-status:empty { display: none; }
   .pl-3d-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .4rem .8rem; margin-top: .5rem; font-size: .8rem; color: var(--ink-2); }
   .pl-3d-actions { display: inline-flex; gap: .9rem; }
-  .pl-3d-actions button { border: 0; background: none; font: inherit; font-size: .85rem; font-weight: 600; color: var(--blue); cursor: pointer; padding: .2rem 0; }
+  .pl-3d-actions button { border: 0; background: none; font: inherit; font-size: .85rem; font-weight: 600; color: var(--blue-text); cursor: pointer; padding: .2rem 0; }
   .pl-3d-actions button:hover { text-decoration: underline; }
   .pl-sumbox { display: grid; gap: .9rem; }
+  .ar-btn { display: inline-flex; align-items: center; gap: .35rem; }
+  .ar-btn svg { width: 1.05rem; height: 1.05rem; }
+  .ar-dialog { width: min(720px, calc(100vw - 1.5rem)); max-height: calc(100vh - 2rem); padding: 0; border: 0; background: #fff; color: var(--ink); }
+  .ar-dialog::backdrop { background: rgba(6, 22, 38, .75); }
+  .ar-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .8rem 1rem; background: var(--navy); color: #fff; }
+  .ar-head p { font-weight: 700; }
+  .ar-x { width: 2.5rem; height: 2.5rem; border: 0; background: none; color: #fff; font-size: 1.7rem; cursor: pointer; }
+  .ar-stage { position: relative; height: min(62vh, 520px); background: #E9EEF5; }
+  .ar-stage :global(model-viewer) { display: block; width: 100%; height: 100%; --poster-color: transparent; }
+  .ar-status { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink-2); font-size: .95rem; }
+  .ar-status[hidden] { display: none; }
+  .ar-stage :global(.ar-place) { position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); display: inline-flex; align-items: center; gap: .5rem; border: 0; background: var(--amber); color: var(--navy); font: inherit; font-weight: 700; padding: .8rem 1.3rem; cursor: pointer; box-shadow: 0 8px 24px rgba(10,37,62,.3); }
+  .ar-hint { padding: .9rem 1rem 1.1rem; color: var(--ink-2); font-size: .92rem; }
+
   .pl-concept { position: absolute; top: .6rem; inset-inline-start: .6rem; z-index: 1; max-width: calc(100% - 1.2rem); font-size: .75rem; font-weight: 600; color: var(--navy); background: rgba(255,255,255,.88); padding: .25rem .55rem; pointer-events: none; }
   @media (max-width: 960px) {
     /* On phones the 3D view comes first and stays in view while the visitor picks options */

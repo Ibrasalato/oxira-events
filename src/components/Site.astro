@@ -3,6 +3,7 @@ import Logo from './Logo.astro';
 import LangPicker from './LangPicker.astro';
 import Calendar from './Calendar.astro';
 import Planner from './Planner.astro';
+import Booking from './Booking.astro';
 import { x } from '../i18n/extra';
 import { t, WORK, AISLE, CONTACT, N8N, langPath, type Lang } from '../i18n/content';
 
@@ -60,9 +61,9 @@ const FIRST = 12;
       <div class="aisle-track">
         {[0, 1].map((dup) => (
           <ul class="aisle-set" aria-hidden={dup === 1 ? 'true' : undefined}>
-            {aisle.map((w) => (
+            {aisle.map((w, i) => (
               <li class="cut">
-                <img src={img(`work/${w.id}-s.webp`)} width={w.w} height={w.h} alt={dup === 1 ? '' : (w.brand ? `${c.work.stand}: ${w.brand}` : c.work.stand)} loading={dup === 1 ? 'lazy' : 'eager'} decoding="async" />
+                <img src={img(`work/${w.id}-s.webp`)} width={w.w} height={w.h} alt={dup === 1 ? '' : (w.brand ? `${c.work.stand}: ${w.brand}` : c.work.stand)} loading={dup === 0 && i < 4 ? 'eager' : 'lazy'} fetchpriority={dup === 0 && i < 3 ? 'high' : undefined} decoding={dup === 0 && i < 3 ? 'sync' : 'async'} />
               </li>
             ))}
           </ul>
@@ -154,6 +155,10 @@ const FIRST = 12;
             <dd>{c.about.vision}</dd>
           </div>
         </dl>
+        <a class="btn btn-ghost profile-dl" href={`${base}/oxira-events-profile-2026.pdf`} download>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 19h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          {x[lang].profile.download} <small>PDF · 4 MB</small>
+        </a>
         <p class="parent">{c.about.parent} <a href={CONTACT.main}>{c.about.parentLink}</a></p>
       </div>
     </div>
@@ -170,8 +175,14 @@ const FIRST = 12;
           <li><a href={`tel:${CONTACT.phoneHref}`}><span>{c.form.phone}</span><bdi dir="ltr">{CONTACT.phone}</bdi></a></li>
           <li><a href={`mailto:${CONTACT.email}`}><span>{c.form.email}</span><bdi dir="ltr">{CONTACT.email}</bdi></a></li>
         </ul>
+        <button type="button" class="book-link" data-open-book>{x[lang].book.link}</button>
       </div>
 
+      <div class="contact-forms" id="book">
+        <div class="cf-tabs" role="tablist">
+          <button type="button" role="tab" aria-selected="true" data-cf="quote">{x[lang].book.tabQuote}</button>
+          <button type="button" role="tab" aria-selected="false" data-cf="book">{x[lang].book.tabBook}</button>
+        </div>
       <form class="quote cut" data-quote novalidate>
         <div class="f-row">
           <label class="f"><span>{c.form.name} *</span><input name="name" autocomplete="name" required maxlength="120" /></label>
@@ -199,6 +210,8 @@ const FIRST = 12;
           <p class="f-status" role="status" aria-live="polite" data-status></p>
         </div>
       </form>
+        <Booking lang={lang} />
+      </div>
     </div>
   </section>
 </main>
@@ -208,6 +221,7 @@ const FIRST = 12;
     <Logo tone="light" />
     <p>{c.footer.tag}</p>
     <p><bdi dir="ltr">{CONTACT.email}</bdi> &nbsp;|&nbsp; <bdi dir="ltr">{CONTACT.phone}</bdi></p>
+    <a class="foot-link" href={`${base}/oxira-events-profile-2026.pdf`} download>{x[lang].profile.download}</a>
     <a class="foot-link" href={`${base}${langPath(lang)}privacy/`}>{x[lang].privacy.link}</a>
     <p class="rights">© {new Date().getFullYear()} {c.footer.rights}</p>
   </div>
@@ -219,12 +233,12 @@ const FIRST = 12;
     <figcaption data-lb-cap></figcaption>
   </figure>
   <button type="button" class="lb-btn lb-close" data-lb-close aria-label={c.work.close}>×</button>
-  <button type="button" class="lb-btn lb-prev" data-lb-prev aria-label={c.work.prev}>‹</button>
-  <button type="button" class="lb-btn lb-next" data-lb-next aria-label={c.work.next}>›</button>
+  <button type="button" class="lb-btn lb-prev" data-lb-prev aria-label={c.work.prev}><svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  <button type="button" class="lb-btn lb-next" data-lb-next aria-label={c.work.next}><svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
 </dialog>
 
 <div class="chat" data-chat>
-  <button type="button" class="chat-fab" data-chat-toggle aria-expanded="false" aria-controls="chat-panel">
+  <button type="button" class="chat-fab" data-chat-toggle aria-label={c.chat.open} aria-expanded="false" aria-controls="chat-panel">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="9" cy="10.5" r="1.1" fill="currentColor"/><circle cx="12" cy="10.5" r="1.1" fill="currentColor"/><circle cx="15" cy="10.5" r="1.1" fill="currentColor"/></svg>
     <span>{c.chat.open}</span>
   </button>
@@ -262,6 +276,17 @@ const FIRST = 12;
 (() => {
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+  // Contact: quote / booking tabs
+  const cfTabs = $$('[data-cf]');
+  const showCf = (v) => {
+    cfTabs.forEach((t) => t.setAttribute('aria-selected', String(t.dataset.cf === v)));
+    $('[data-quote]').hidden = v !== 'quote';
+    $('[data-book]').hidden = v !== 'book';
+  };
+  cfTabs.forEach((t) => t.addEventListener('click', () => showCf(t.dataset.cf)));
+  $$('[data-open-book]').forEach((b) => b.addEventListener('click', () => { showCf('book'); $('#book').scrollIntoView({ block: 'start' }); }));
+  if (location.hash === '#book') showCf('book');
 
   // Gallery: show more
   const more = $('[data-more]');

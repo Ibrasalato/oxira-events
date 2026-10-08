@@ -41,3 +41,9 @@ Separate from the Oxira website agent.
 ## DNS
 
 Add a CNAME record: host `events` → `ibrasalato.github.io`. Then in the repo's Settings → Pages, set the custom domain to `events.oxira.sa` and enable HTTPS.
+
+## Booking, AR and profile
+- Consultation booking (contact section, second tab) posts to `/webhook/oxira-events-booking`; n8n validates the slot (Sun–Thu, 10:00–16:30 Riyadh, ≥1h ahead, ≤45 days), saves it, emails the team and the client with an `.ics` invite. Code in `n8n/booking.js`.
+- Quote requests with an email address get a confirmation in the page language (`n8n/client-email.js`).
+- AR: the 3D planner exports the current stand as GLB and opens it in `<model-viewer>` (WebXR / Scene Viewer on Android, Quick Look on iPhone) at real scale.
+- `public/oxira-events-profile-2026.pdf` is a web-compressed copy of the company profile.
