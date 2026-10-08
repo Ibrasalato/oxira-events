@@ -302,10 +302,17 @@ const FIRST = 12;
     const btn = form.querySelector('[type=submit]');
     btn.disabled = true; btn.textContent = btn.dataset.sending; status.textContent = ''; status.className = 'f-status';
     try {
-      const r = await fetch(N8N.form, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...d, lang, page: location.pathname }) });
+      let design = null;
+      if (window.__standApplied && window.__standExport) {
+        try { design = await window.__standExport(); } catch { design = null; }
+      }
+      const payload = { ...d, lang, page: location.pathname };
+      if (design) { payload.design = design.config; payload.files = design.files; }
+      const r = await fetch(N8N.form, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       const j = await r.json().catch(() => ({}));
       if (!r.ok || !j.success) throw new Error('fail');
       form.reset();
+      window.__standApplied = false;
       status.textContent = formText.ok + ' ' + (j.id ?? '') + '. ' + formText.okTail;
       status.className = 'f-status is-ok';
     } catch {

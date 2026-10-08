@@ -23,7 +23,8 @@ npm run build    # static site in dist/
 | Upcoming exhibitions calendar (edit to add/remove shows; ended shows hide themselves) | `src/i18n/events.json` |
 | Calendar, stand planner, privacy and 404 copy (5 languages) | `src/i18n/extra.ts` |
 | Share images per language (1200×630) | `public/og-<lang>.jpg` |
-| n8n workflow source (reference copy) | `n8n/oxira-events.workflow.ts` |
+| 3D stand designer (three.js, loaded only when the planner is on screen) | `src/scripts/stand3d.ts`, `src/scripts/stand-boot.ts` |
+| n8n workflow source (initial version; the live workflow in n8n is the source of truth) | `n8n/oxira-events.workflow.ts` |
 
 To add a project: put `<id>-s.webp` and `<id>-l.webp` in `public/img/work/`, add its size to `src/i18n/work-dims.json`, and add `{ id, brand? }` to `WORK` in `content.ts`.
 
@@ -34,6 +35,7 @@ Separate from the Oxira website agent.
 - Chat widget → `POST https://ibrasalato.app.n8n.cloud/webhook/oxira-events-chat` with `{ sessionId, message, lang, page }`, returns `{ reply }`.
 - Quote form → `POST https://ibrasalato.app.n8n.cloud/webhook/oxira-events-contact`, returns `{ success, id }`.
 - Both save to the n8n data table `oxira_events_leads` and email info@oxira.sa.
+- When the visitor used the stand planner, the form also sends `design` (choices) and `files` (preview JPG, GLB, OBJ as base64). The "Prepare attachments" node turns them into email attachments: the preview is embedded, the GLB keeps colours and logo, and the OBJ opens in any 3ds Max version. Units are metres.
 - Allowed origins: `https://events.oxira.sa`, `https://ibrasalato.github.io`, `http://localhost:4321`.
 
 ## DNS

@@ -79,6 +79,52 @@ const evName = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? e
           </div>
         </fieldset>
 
+        <fieldset>
+          <legend>{p.look}</legend>
+          <div class="look">
+            <div class="look-row">
+              <span class="look-l" id="wall-l">{p.wall}</span>
+              <div class="swatches" role="radiogroup" aria-labelledby="wall-l">
+                {p.walls.map((w) => (
+                  <label class="sw" title={w.t}>
+                    <input type="radio" name="wall" value={w.id} checked={w.id === 'white'} />
+                    <span class={`sw-dot sw-${w.id}`}></span>
+                    <span class="sw-t">{w.t}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div class="look-row">
+              <span class="look-l" id="floor-l">{p.carpet}</span>
+              <div class="swatches" role="radiogroup" aria-labelledby="floor-l">
+                {p.carpets.map((w) => (
+                  <label class="sw" title={w.t}>
+                    <input type="radio" name="carpet" value={w.id} checked={w.id === 'grey'} />
+                    <span class={`sw-dot fl-${w.id}`}></span>
+                    <span class="sw-t">{w.t}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <label class="look-row">
+              <span class="look-l">{p.accent}</span>
+              <span class="accent-pick"><input type="color" name="accent" value="#F5A800" /><span data-accent-hex dir="ltr">#F5A800</span></span>
+            </label>
+            <div class="look-row look-logo">
+              <span class="look-l">{p.logo}</span>
+              <div class="logo-up">
+                <label class="btn btn-ghost btn-sm logo-btn">
+                  <input type="file" name="logo" accept="image/png,image/jpeg,image/webp,image/svg+xml" />
+                  {p.logoPick}
+                </label>
+                <span class="logo-thumb" data-logo-thumb hidden></span>
+                <button type="button" class="logo-clear" data-logo-clear hidden>{p.logoClear}</button>
+              </div>
+              <p class="look-hint">{p.logoHint}</p>
+            </div>
+          </div>
+        </fieldset>
+
         <label class="pl-event">
           <span>{p.event}</span>
           <select name="event">
@@ -88,9 +134,22 @@ const evName = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? e
         </label>
       </form>
 
-      <aside class="pl-out" aria-live="polite">
-        <p class="pl-out-t">{p.plan}</p>
-        <div class="pl-draw">
+      <aside class="pl-out" aria-live="polite" data-txt={JSON.stringify({ loading: p.loading, noWebgl: p.noWebgl })}>
+        <div class="pl-tabs" role="tablist" aria-label={p.plan}>
+          <button type="button" role="tab" data-view="3d" aria-selected="true">{p.view3d}</button>
+          <button type="button" role="tab" data-view="2d" aria-selected="false">{p.view2d}</button>
+        </div>
+        <div class="pl-pane" data-pane="3d">
+          <div class="pl-3d" data-stand3d><p class="pl-status" data-stand-status></p></div>
+          <div class="pl-3d-bar">
+            <span class="pl-drag">{p.drag}</span>
+            <span class="pl-3d-actions">
+              <button type="button" data-stand-reset>{p.reset}</button>
+              <button type="button" data-stand-save>{p.save}</button>
+            </span>
+          </div>
+        </div>
+        <div class="pl-pane pl-draw" data-pane="2d" hidden>
           <svg viewBox="0 0 320 240" data-plan-svg role="img" aria-label={p.plan}></svg>
         </div>
         <p class="pl-out-t">{p.summary}</p>
@@ -119,6 +178,8 @@ const evName = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? e
       size, plus: !custom && Number(f.get('size')) === 100,
       type: f.get('type'), build: f.get('build'),
       extras: f.getAll('extras'), event: f.get('event'),
+      wall: f.get('wall'), carpet: f.get('carpet'), accent: String(f.get('accent') || '').toUpperCase(),
+      logo: !!(form.logo && form.logo.files && form.logo.files.length),
     };
   };
   const dims = (a) => {
@@ -172,12 +233,18 @@ const evName = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? e
     const ex = s.extras.map((id) => P.extrasList.find((e) => e.id === id).t);
     const parts = [`${P.size}: ${nf.format(s.size)}${s.plus ? '+' : ''} ${P.sqm}`, `${ty.d} (${ty.t})`, b];
     if (ex.length) parts.push(ex.join(lang === 'ar' ? '، ' : ', '));
+    const wl = P.walls.find((w) => w.id === s.wall), cp = P.carpets.find((c) => c.id === s.carpet);
+    parts.push(`${P.wall}: ${wl ? wl.t : ''}`, `${P.carpet}: ${cp ? cp.t : ''}`, `${P.accent}: ${s.accent}`);
+    if (s.logo) parts.push(`${P.logo} ✓`);
     if (s.event) parts.push(`${P.event}: ${s.event}${eventDate ? ' · ' + eventDate : ''}`);
     return parts.join(' — ');
   };
 
   const update = () => { const s = state(); draw(s); sumEl.textContent = summary(s); };
+  const hex = document.querySelector('[data-accent-hex]');
+  form.addEventListener('change', (e) => { if (e.target.name === 'logo') update(); });
   form.addEventListener('input', (e) => {
+    if (e.target.name === 'accent' && hex) hex.textContent = e.target.value.toUpperCase();
     if (e.target.name === 'size') form.sizeCustom.value = '';
     if (e.target.name === 'event') eventDate = '';
     update();
@@ -202,11 +269,17 @@ const evName = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? e
     q.service.selectedIndex = 0;
     const text = summary(s);
     q.details.value = q.details.value.trim() ? q.details.value.trim() + '\n' + text : text;
-    document.querySelector('[data-plan-note]').textContent = P.applied;
+    window.__standApplied = true;
+    document.querySelector('[data-plan-note]').textContent = P.applied + ' ' + P.attached;
     document.getElementById('contact').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
     setTimeout(() => q.name.focus({ preventScroll: true }), 500);
   });
 })();
+</script>
+
+<script>
+  import { boot } from '../scripts/stand-boot';
+  boot();
 </script>
 
 <style>
@@ -244,6 +317,49 @@ const evName = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? e
   .pl-out { position: sticky; top: 5.5rem; background: #fff; border: 1px solid var(--line); padding: 1.5rem; display: grid; gap: .9rem; }
   .pl-out-t { font-size: .85rem; font-weight: 700; color: var(--blue); }
   .pl-draw svg { width: 100%; height: auto; display: block; }
+  .look { display: grid; gap: 1rem; background: #fff; border: 1px solid var(--line); padding: 1rem 1.1rem; }
+  .look-row { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); align-items: center; gap: .6rem 1rem; }
+  .look-l { font-size: .9rem; font-weight: 600; color: var(--ink-2); }
+  .swatches { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .sw { position: relative; display: inline-flex; align-items: center; gap: .4rem; padding: .3rem .6rem .3rem .35rem; border: 1px solid var(--line); cursor: pointer; font-size: .85rem; }
+  .sw input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .sw-dot { width: 1.3rem; height: 1.3rem; box-shadow: inset 0 0 0 1px rgba(10,37,62,.18); flex: none; }
+  .sw:has(input:checked) { border-color: var(--navy); box-shadow: inset 0 0 0 1px var(--navy); }
+  .sw:has(input:focus-visible) { outline: 3px solid var(--amber); outline-offset: 2px; }
+  .sw-white { background: #F3F4F6; } .sw-navy { background: #0F2D4A; } .sw-black { background: #1C1F24; }
+  .sw-wood { background: linear-gradient(135deg, #C79A6B, #A57A4F); }
+  .fl-grey { background: #8B949F; } .fl-blue { background: #24508F; } .fl-red { background: #A8232C; }
+  .fl-wood { background: repeating-linear-gradient(90deg, #B58858 0 6px, #A0744A 6px 7px); }
+  .accent-pick { display: inline-flex; align-items: center; gap: .6rem; font-size: .9rem; font-weight: 600; }
+  .accent-pick input { width: 2.6rem; height: 2rem; padding: 0; border: 1px solid var(--line); background: #fff; cursor: pointer; }
+  .look-logo .look-hint { grid-column: 2; font-size: .8rem; color: var(--ink-2); }
+  .logo-up { display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; }
+  .logo-btn { position: relative; overflow: hidden; }
+  .logo-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .logo-btn:focus-within { outline: 3px solid var(--amber); outline-offset: 2px; }
+  .logo-thumb { display: inline-grid; place-items: center; width: 3.2rem; height: 2.2rem; background: var(--mist); border: 1px solid var(--line); }
+  .logo-thumb[hidden], .logo-clear[hidden] { display: none; }
+  .logo-thumb img { max-width: 90%; max-height: 90%; }
+  .logo-clear { border: 0; background: none; color: var(--blue); font: inherit; font-size: .85rem; font-weight: 600; cursor: pointer; text-decoration: underline; }
+  .pl-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--line); }
+  .pl-tabs button { border: 0; background: none; font: inherit; font-weight: 700; font-size: .9rem; padding: .5rem .9rem; color: var(--ink-2); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px; }
+  .pl-tabs button[aria-selected="true"] { color: var(--navy); border-color: var(--amber); }
+  .pl-tabs button[hidden] { display: none; }
+  .pl-pane[hidden] { display: none; }
+  .pl-3d { position: relative; aspect-ratio: 4 / 3; background: #E9EEF5; overflow: hidden; touch-action: none; }
+  .pl-3d canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+  .pl-3d canvas:active { cursor: grabbing; }
+  .pl-status { position: absolute; inset: 0; display: grid; place-items: center; padding: 1rem; text-align: center; font-size: .9rem; color: var(--ink-2); pointer-events: none; }
+  .pl-status:empty { display: none; }
+  .pl-3d-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .4rem .8rem; margin-top: .5rem; font-size: .8rem; color: var(--ink-2); }
+  .pl-3d-actions { display: inline-flex; gap: .9rem; }
+  .pl-3d-actions button { border: 0; background: none; font: inherit; font-size: .85rem; font-weight: 600; color: var(--blue); cursor: pointer; padding: .2rem 0; }
+  .pl-3d-actions button:hover { text-decoration: underline; }
+  @media (max-width: 560px) {
+    .look-row { grid-template-columns: 1fr; }
+    .look-logo .look-hint { grid-column: 1; }
+  }
+
   .pl-sum { font-size: 1rem; line-height: 1.8; min-height: 3.6em; }
   .pl-note { font-size: .9rem; color: #0B6B3A; font-weight: 600; }
   .pl-note:empty { display: none; }
