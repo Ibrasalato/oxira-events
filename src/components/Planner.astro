@@ -2,6 +2,7 @@
 import events from '../i18n/events.json';
 import { x } from '../i18n/extra';
 import { N8N, type Lang } from '../i18n/content';
+import { PRICING, priceTxt } from '../i18n/pricing';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -161,6 +162,7 @@ const evName = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? e
         <div class="pl-sumbox">
           <p class="pl-out-t">{p.summary}</p>
           <p class="pl-sum" data-plan-summary></p>
+          <p class="pl-price" data-plan-price hidden></p>
           <button type="button" class="btn btn-amber" data-plan-apply>{p.apply}</button>
           <button type="button" class="btn btn-ghost pl-render-btn" data-stand-render>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z M19 15l.8 2.2 2.2.8-2.2.8L19 21l-.8-2.2-2.2-.8 2.2-.8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
@@ -195,7 +197,7 @@ const evName = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? e
   <p class="ar-hint" data-ar-hint></p>
 </dialog>
 
-<script is:inline define:vars={{ P: p, lang }}>
+<script is:inline define:vars={{ P: p, lang, PRICE: PRICING, PT: priceTxt[lang] }}>
 (() => {
   const form = document.querySelector('[data-planner]');
   const svg = document.querySelector('[data-plan-svg]');
@@ -274,7 +276,22 @@ const evName = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? e
     return parts.join(' — ');
   };
 
-  const update = () => { const s = state(); draw(s); sumEl.textContent = summary(s); };
+  const priceEl = document.querySelector('[data-plan-price]');
+  const estimate = (s) => {
+    const rate = PRICE.perM2[s.build];
+    if (typeof rate !== 'number' || !s.size) return null;
+    let v = rate * s.size;
+    for (const id of s.extras) { const x = PRICE.extras[id]; if (typeof x === 'number') v += x; }
+    if (typeof PRICE.min === 'number') v = Math.max(v, PRICE.min);
+    const r = (n) => Math.round(n / 500) * 500;
+    return [r(v * (1 - PRICE.spread)), r(v * (1 + PRICE.spread))];
+  };
+  const update = () => {
+    const s = state(); draw(s); sumEl.textContent = summary(s);
+    const e = estimate(s);
+    priceEl.hidden = !e;
+    if (e) priceEl.innerHTML = `<b>${PT.label}: ${nf.format(e[0])} – ${nf.format(e[1])} ${PT.sar}</b> <span>${PT.vat}. ${PT.note}</span>`;
+  };
   const hex = document.querySelector('[data-accent-hex]');
   form.addEventListener('change', (e) => { if (e.target.name === 'logo') update(); });
   form.addEventListener('input', (e) => {
@@ -450,4 +467,7 @@ const evName = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? e
   .rr-note { font-size: .85rem; color: var(--ink-2); margin-top: .6rem; }
   .rr-foot { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .8rem; }
   .rr-foot[hidden] { display: none; }
+  .pl-price { margin-top: .6rem; padding: .6rem .8rem; background: var(--mist); font-size: .92rem; }
+  .pl-price b { color: var(--navy); display: block; }
+  .pl-price span { color: var(--ink-2); font-size: .82rem; }
 </style>
