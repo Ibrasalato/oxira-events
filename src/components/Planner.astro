@@ -341,16 +341,17 @@ const evName = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? e
   .logo-btn:focus-within { outline: 3px solid var(--amber); outline-offset: 2px; }
   .logo-thumb { display: inline-grid; place-items: center; width: 3.2rem; height: 2.2rem; background: var(--mist); border: 1px solid var(--line); }
   .logo-thumb[hidden], .logo-clear[hidden] { display: none; }
-  .logo-thumb img { max-width: 90%; max-height: 90%; }
+  .logo-thumb :global(img) { max-width: 90%; max-height: 90%; }
   .logo-clear { border: 0; background: none; color: var(--blue); font: inherit; font-size: .85rem; font-weight: 600; cursor: pointer; text-decoration: underline; }
   .pl-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--line); }
   .pl-tabs button { border: 0; background: none; font: inherit; font-weight: 700; font-size: .9rem; padding: .5rem .9rem; color: var(--ink-2); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px; }
   .pl-tabs button[aria-selected="true"] { color: var(--navy); border-color: var(--amber); }
   .pl-tabs button[hidden] { display: none; }
   .pl-pane[hidden] { display: none; }
-  .pl-3d { position: relative; aspect-ratio: 4 / 3; background: #E9EEF5; overflow: hidden; touch-action: none; }
-  .pl-3d canvas { display: block; width: 100%; height: 100%; cursor: grab; }
-  .pl-3d canvas:active { cursor: grabbing; }
+  .pl-3d { position: relative; width: 100%; aspect-ratio: 4 / 3; min-height: 0; background: #E9EEF5; overflow: hidden; touch-action: none; contain: strict; }
+  /* the canvas is taken out of flow so its pixel buffer can never resize the frame */
+  .pl-3d :global(canvas) { position: absolute; inset: 0; display: block; width: 100% !important; height: 100% !important; cursor: grab; }
+  .pl-3d :global(canvas:active) { cursor: grabbing; }
   .pl-status { position: absolute; inset: 0; display: grid; place-items: center; padding: 1rem; text-align: center; font-size: .9rem; color: var(--ink-2); pointer-events: none; }
   .pl-status:empty { display: none; }
   .pl-3d-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .4rem .8rem; margin-top: .5rem; font-size: .8rem; color: var(--ink-2); }

@@ -532,8 +532,13 @@ export function createViewer(host: HTMLElement, opts: { reducedMotion: boolean }
   };
   const start = () => { if (!running && visible) { running = true; requestAnimationFrame(loop); } };
   const stop = () => { running = false; };
+  let lastW = 0, lastH = 0;
   const resize = () => {
-    const w = host.clientWidth || 640, h = host.clientHeight || 480;
+    // CSS size of the frame; clamp so a bad layout can never blow up the GPU buffer
+    const w = Math.min(Math.round(host.clientWidth) || 640, 2000);
+    const h = Math.min(Math.round(host.clientHeight) || 480, 1500);
+    if (w === lastW && h === lastH) return;
+    lastW = w; lastH = h;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
@@ -552,6 +557,7 @@ export function createViewer(host: HTMLElement, opts: { reducedMotion: boolean }
       const changed = !prev || dims(prev.size).join() !== dims(cfg.size).join();
       frame(!first && !changed);
       first = false;
+      lastW = 0;
       resize();
       start();
     },
@@ -571,6 +577,7 @@ export function createViewer(host: HTMLElement, opts: { reducedMotion: boolean }
       renderer.setSize(size.x, size.y, false);
       camera.aspect = size.x / size.y; camera.updateProjectionMatrix();
       renderer.render(scene, camera);
+      lastW = size.x; lastH = size.y;
       return url;
     },
     async exportGLB(): Promise<ArrayBuffer> {
