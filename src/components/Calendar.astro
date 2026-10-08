@@ -1,11 +1,13 @@
 ---
 import events from '../i18n/events.json';
 import { x } from '../i18n/extra';
-import type { Lang } from '../i18n/content';
+import { N8N, type Lang } from '../i18n/content';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const e = x[lang].cal;
+const al = x[lang].alerts;
+const sectorIds = Object.keys(e.sectors);
 const locale = { ar: 'ar-u-ca-gregory-nu-latn', en: 'en-GB', de: 'de-DE', fr: 'fr-FR', ru: 'ru-RU' }[lang];
 const month = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' });
 const monthShort = new Intl.DateTimeFormat(locale, { month: 'short', timeZone: 'UTC' });
@@ -51,6 +53,23 @@ const FIRST = 8;
       <button type="button" class="btn btn-ghost" data-cal-more aria-expanded="false" data-more-label={e.more} data-less-label={e.less}>{e.more}</button>
       <p class="cal-src">{e.source}</p>
     </div>
+    <form class="cal-alerts" data-alerts data-cfg={JSON.stringify({ url: N8N.alerts, lang, t: { sending: al.sending, ok: al.ok, err: al.err, missing: al.missing, submit: al.submit } })} novalidate>
+      <div class="cal-alerts-head">
+        <h3>{al.title}</h3>
+        <p>{al.lead}</p>
+      </div>
+      <fieldset>
+        <legend>{al.sectors}</legend>
+        <div class="cal-sectors">
+          {sectorIds.map((id) => <label><input type="checkbox" name="sectors" value={id} /><span>{e.sectors[id]}</span></label>)}
+        </div>
+      </fieldset>
+      <div class="cal-alerts-row">
+        <label class="cal-email"><span class="sr">{al.email}</span><input type="email" name="email" required autocomplete="email" placeholder={al.email} dir="ltr" /></label>
+        <button type="submit" class="btn btn-amber">{al.submit}</button>
+      </div>
+      <p class="cal-alerts-msg" data-alerts-msg role="status">{al.unsub}</p>
+    </form>
   </div>
 </section>
 
@@ -69,6 +88,28 @@ const FIRST = 8;
     more.setAttribute('aria-expanded', String(open));
     more.textContent = open ? more.dataset.lessLabel : more.dataset.moreLabel;
   });
+
+  // Exhibition alerts → n8n "Oxira Events — Exhibition alerts"
+  const af = document.querySelector('[data-alerts]');
+  if (af) {
+    const c = JSON.parse(af.dataset.cfg);
+    const msg = af.querySelector('[data-alerts-msg]');
+    const btn = af.querySelector('button[type=submit]');
+    af.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const f = new FormData(af);
+      const email = String(f.get('email') || '').trim();
+      const sectors = f.getAll('sectors');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || !sectors.length) { msg.textContent = c.t.missing; msg.classList.add('is-err'); return; }
+      btn.disabled = true; btn.textContent = c.t.sending; msg.classList.remove('is-err');
+      try {
+        const r = await (await fetch(c.url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, sectors, lang: c.lang }) })).json();
+        if (r.success) { msg.textContent = c.t.ok; af.reset(); }
+        else { msg.textContent = r.reason === 'invalid' ? c.t.missing : c.t.err; msg.classList.add('is-err'); }
+      } catch { msg.textContent = c.t.err; msg.classList.add('is-err'); }
+      btn.disabled = false; btn.textContent = c.t.submit;
+    });
+  }
 })();
 </script>
 
@@ -91,6 +132,22 @@ const FIRST = 8;
   .cal-link { font-size: .9rem; font-weight: 600; color: var(--blue-text); white-space: nowrap; }
   .cal-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1.75rem; }
   .cal-src { font-size: .85rem; color: var(--ink-2); }
+  .cal-alerts { margin-top: 2.5rem; padding: clamp(1.25rem, 3vw, 2rem); background: var(--mist); display: grid; gap: 1.1rem; }
+  .cal-alerts-head h3 { font-size: 1.25rem; color: var(--navy); }
+  .cal-alerts-head p { color: var(--ink-2); margin-top: .35rem; max-width: 46rem; }
+  .cal-alerts fieldset { border: 0; padding: 0; margin: 0; }
+  .cal-alerts legend { font-weight: 600; font-size: .92rem; margin-bottom: .5rem; }
+  .cal-sectors { display: flex; flex-wrap: wrap; gap: .45rem; }
+  .cal-sectors label { cursor: pointer; }
+  .cal-sectors input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .cal-sectors span { display: inline-block; padding: .4rem .8rem; background: #fff; border: 1px solid var(--line); font-size: .9rem; }
+  .cal-sectors input:checked + span { background: var(--navy); color: #fff; border-color: var(--navy); }
+  .cal-sectors input:focus-visible + span { outline: 2px solid var(--amber); outline-offset: 2px; }
+  .cal-alerts-row { display: flex; flex-wrap: wrap; gap: .6rem; }
+  .cal-email { flex: 1 1 16rem; }
+  .cal-email input { width: 100%; font: inherit; padding: .75rem .9rem; border: 1px solid var(--line); background: #fff; color: var(--ink); }
+  .cal-alerts-msg { font-size: .85rem; color: var(--ink-2); }
+  .cal-alerts-msg.is-err { color: #A1260D; font-weight: 600; }
   @media (max-width: 760px) {
     .cal-row { grid-template-columns: 1fr; gap: .5rem; }
     .cal-date { grid-auto-flow: column; justify-content: start; gap: .6rem; align-items: baseline; }
