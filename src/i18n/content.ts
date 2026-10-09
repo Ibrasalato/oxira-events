@@ -13,11 +13,11 @@ export const languages: { code: Lang; name: string; flag: string; locale: string
 export const langPath = (l: Lang) => (l === 'ar' ? '/' : `/${l}/`);
 
 export const N8N = {
-  chat: 'https://ibrasalato.app.n8n.cloud/webhook/oxira-events-chat',
-  form: 'https://ibrasalato.app.n8n.cloud/webhook/oxira-events-contact',
-  booking: 'https://ibrasalato.app.n8n.cloud/webhook/oxira-events-booking',
-  boothRender: 'https://ibrasalato.app.n8n.cloud/webhook/oxira-events-booth-render',
-  alerts: 'https://ibrasalato.app.n8n.cloud/webhook/oxira-events-alerts',
+  chat: 'https://api.oxira.sa/oxira-events-chat',
+  form: 'https://api.oxira.sa/oxira-events-contact',
+  booking: 'https://api.oxira.sa/oxira-events-booking',
+  boothRender: 'https://api.oxira.sa/oxira-events-booth-render',
+  alerts: 'https://api.oxira.sa/oxira-events-alerts',
 };
 
 export const CONTACT = {
