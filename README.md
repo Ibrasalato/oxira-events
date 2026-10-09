@@ -32,8 +32,8 @@ To add a project: put `<id>-s.webp` and `<id>-l.webp` in `public/img/work/`, add
 
 Separate from the Oxira website agent.
 
-- Chat widget → `POST https://ibrasalato.app.n8n.cloud/webhook/oxira-events-chat` with `{ sessionId, message, lang, page }`, returns `{ reply }`.
-- Quote form → `POST https://ibrasalato.app.n8n.cloud/webhook/oxira-events-contact`, returns `{ success, id }`.
+- Chat widget → `POST https://api.oxira.sa/oxira-events-chat` with `{ sessionId, message, lang, page }`, returns `{ reply }`.
+- Quote form → `POST https://api.oxira.sa/oxira-events-contact`, returns `{ success, id }`.
 - Both save to the n8n data table `oxira_events_leads` and email info@oxira.sa.
 - When the visitor used the stand planner, the form also sends `design` (choices) and `files` (preview JPG, GLB, OBJ as base64). The "Prepare attachments" node turns them into email attachments: the preview is embedded, the GLB keeps colours and logo, and the OBJ opens in any 3ds Max version. Units are metres.
 - Allowed origins: `https://events.oxira.sa`, `https://ibrasalato.github.io`, `http://localhost:4321`.
