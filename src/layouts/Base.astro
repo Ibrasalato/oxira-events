@@ -20,6 +20,8 @@ const site = 'https://events.oxira.sa';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const current = languages.find((l) => l.code === lang)!;
 const title = page === 'privacy/' ? `${x[lang].privacy.title} | Oxira Events` : page === '404' ? `${x[lang].notFound.title} | Oxira Events` : c.title;
+const clip = (v: string) => (v.length > 158 ? v.slice(0, 155).replace(/\s+\S*$/, '') + '…' : v);
+const description = page === 'privacy/' ? clip(x[lang].privacy.body[0].p) : c.description;
 const url = (l: Lang) => `${site}${langPath(l)}${page === '404' ? '' : page}`;
 ---
 <!doctype html>
@@ -29,14 +31,14 @@ const url = (l: Lang) => `${site}${langPath(l)}${page === '404' ? '' : page}`;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     {noindex && <meta name="robots" content="noindex" />}
-    <meta name="description" content={c.description} />
+    <meta name="description" content={description} />
     <link rel="canonical" href={url(lang)} />
     {languages.map((l) => <link rel="alternate" hreflang={l.code} href={url(l.code)} />)}
     <link rel="alternate" hreflang="x-default" href={url('ar')} />
     <meta name="theme-color" content="#0A253E" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
-    <meta property="og:description" content={c.description} />
+    <meta property="og:description" content={description} />
     <meta property="og:url" content={url(lang)} />
     <meta property="og:image" content={`${site}/og-${lang}.jpg`} />
     <meta property="og:image:width" content="1200" />
@@ -51,8 +53,11 @@ const url = (l: Lang) => `${site}${langPath(l)}${page === '404' ? '' : page}`;
       url: site,
       email: 'info@oxira.sa',
       telephone: '+966565670776',
+      logo: `${site}/favicon.svg`,
       parentOrganization: { '@type': 'Organization', name: 'Oxira', url: 'https://oxira.sa' },
-      areaServed: 'SA',
+      address: { '@type': 'PostalAddress', streetAddress: '426 Al Sulaymaniyah, Al Urubah Rd.', addressLocality: 'Riyadh', addressCountry: 'SA' },
+      areaServed: { '@type': 'Country', name: 'Saudi Arabia' },
+      knowsAbout: ['Exhibition stand design', 'Exhibition stand build', 'Conference stage production', 'Event lighting and sound', 'Event printing'],
     })} />
   </head>
   <body>
