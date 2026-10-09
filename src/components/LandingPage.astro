@@ -1,0 +1,293 @@
+---
+// Service and region landing pages (and the services hub), in Arabic and English.
+// Same header, footer, buttons, brand cut and chat widget as the home page; the quote form and booking
+// live on the home page, so CTAs link there (#contact, #book) or open the chat / WhatsApp.
+import Base from '../layouts/Base.astro';
+import Logo from './Logo.astro';
+import LangPicker from './LangPicker.astro';
+import Chat from './Chat.astro';
+import FootLinks from './FootLinks.astro';
+import { t, WORK, CONTACT, langPath } from '../i18n/content';
+import { x } from '../i18n/extra';
+import { PAGES, SERVICES, REGIONS, COPY, HUB, HUB_SLUG, UI, LANDING_LANGS, landingHref, rich, plain, type LLang } from '../i18n/landing';
+
+interface Props { lang: LLang; slug: string }
+const { lang, slug } = Astro.props;
+const site = 'https://events.oxira.sa';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const c = t[lang];
+const u = UI[lang];
+const home = `${base}${langPath(lang)}`;
+const isHub = slug === HUB_SLUG;
+const page = PAGES.find((p) => p.slug === slug);
+if (!isHub && !page) throw new Error(`Unknown landing page: ${slug}`);
+const copy = isHub ? HUB[lang] : COPY[lang][slug];
+const abs = (s: string) => `${site}${landingHref(lang, s)}`;
+const hubName = HUB[lang].name;
+
+const photo = WORK.find((w) => w.id === (page?.img ?? '8'))!;
+const photoAlt = photo.brand ? `${c.work.stand}: ${photo.brand}` : u.photo;
+
+const crumbs = [
+  { name: u.home, url: `${site}${langPath(lang)}` },
+  ...(isHub ? [] : [{ name: hubName, url: abs(HUB_SLUG) }]),
+  { name: isHub ? hubName : copy.h1, url: abs(slug) },
+];
+
+const org = { '@id': `${site}/#org` };
+const ld: unknown[] = [
+  { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: crumbs.map((b, i) => ({ '@type': 'ListItem', position: i + 1, name: b.name, item: b.url })) },
+];
+if (page) {
+  const cp = COPY[lang][slug];
+  ld.push({
+    '@context': 'https://schema.org', '@type': 'Service',
+    name: cp.h1, serviceType: page.serviceType, description: cp.description, url: abs(slug),
+    provider: { '@type': 'Organization', ...org, name: 'Oxira Events', url: site },
+    areaServed: page.area, availableLanguage: ['ar', 'en'],
+  });
+  ld.push({
+    '@context': 'https://schema.org', '@type': 'FAQPage',
+    mainEntity: cp.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: plain(f.a) } })),
+  });
+} else {
+  ld.push({
+    '@context': 'https://schema.org', '@type': 'ItemList', name: copy.h1,
+    itemListElement: [...SERVICES, ...REGIONS].map((p, i) => ({ '@type': 'ListItem', position: i + 1, name: COPY[lang][p.slug].name, url: abs(p.slug) })),
+  });
+}
+const related = page ? page.related.map((s) => PAGES.find((p) => p.slug === s)!) : [];
+const card = (s: string) => COPY[lang][s];
+---
+<Base lang={lang} page={`${slug}/`} langs={LANDING_LANGS} title={copy.title} description={copy.description} ld={ld}>
+  <a class="skip" href="#main">{lang === 'ar' ? 'تخطَّ إلى المحتوى' : 'Skip to content'}</a>
+
+  <header class="top">
+    <div class="wrap top-row">
+      <a href={home} aria-label="Oxira Events"><Logo /></a>
+      <nav class="nav" aria-label={c.nav.services}>
+        <a href={`${base}${landingHref(lang, HUB_SLUG)}`} aria-current={isHub ? 'page' : undefined}>{c.nav.services}</a>
+        <a href={`${home}#planner`}>{x[lang].cta.navPlanner}</a>
+        <a href={`${home}#work`}>{c.nav.work}</a>
+        <a href={`${home}#about`}>{c.nav.about}</a>
+        <a href={`${home}#contact`}>{c.nav.contact}</a>
+      </nav>
+      <div class="top-actions">
+        <LangPicker lang={lang} langs={LANDING_LANGS} />
+        <a class="btn btn-amber btn-sm" href={`${home}#contact`}>{c.quote}</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="lp-hero" aria-labelledby="lp-title">
+      <div class="wrap lp-hero-grid">
+        <div>
+          <nav class="crumbs" aria-label={lang === 'ar' ? 'مسار التنقل' : 'Breadcrumb'}>
+            <ol>
+              {crumbs.map((b, i) => (
+                <li>{i < crumbs.length - 1 ? <a href={b.url.replace(site, base)}>{b.name}</a> : <span aria-current="page">{b.name}</span>}</li>
+              ))}
+            </ol>
+          </nav>
+          <p class="kicker">{copy.kicker}</p>
+          <h1 id="lp-title">{copy.h1}</h1>
+          <p class="lead">{copy.lead}</p>
+          <div class="cta-row">
+            <a class="btn btn-amber" href={`${home}#contact`}>{u.quote}</a>
+            <a class="btn btn-ghost" href={CONTACT.whatsapp} rel="noopener" target="_blank">{u.whatsapp}</a>
+          </div>
+          <button class="hero-chat" type="button" data-open-chat>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="9" cy="10.5" r="1.1" fill="currentColor"/><circle cx="12" cy="10.5" r="1.1" fill="currentColor"/><circle cx="15" cy="10.5" r="1.1" fill="currentColor"/></svg>
+            {u.chat}
+          </button>
+        </div>
+        <figure class="lp-photo cut">
+          <img src={`${base}/img/work/${photo.id}-s.webp`} width={photo.w} height={photo.h} alt={photoAlt} fetchpriority="high" decoding="async" />
+        </figure>
+      </div>
+    </section>
+
+    {page && (
+      <section class="lp-body">
+        <div class="wrap lp-body-grid">
+          <article class="lp-article">
+            {COPY[lang][slug].blocks.map((b) => (
+              <>
+                <h2>{b.h}</h2>
+                {b.p?.map((p) => <p set:html={rich(p, lang)} />)}
+                {b.list && <ul>{b.list.map((li) => <li set:html={rich(li, lang)} />)}</ul>}
+                {b.after?.map((p) => <p set:html={rich(p, lang)} />)}
+              </>
+            ))}
+          </article>
+          <aside class="lp-aside">
+            <div class="lp-aside-card cut">
+              <p class="lp-aside-h">{u.asideTitle}</p>
+              <p>{u.asideLead}</p>
+              <a class="btn btn-amber" href={`${home}#contact`}>{u.quote}</a>
+              <ul class="lp-direct">
+                <li><a href={CONTACT.whatsapp} rel="noopener" target="_blank"><span>{c.form.whatsapp}</span><bdi dir="ltr">{CONTACT.phone}</bdi></a></li>
+                <li><a href={`tel:${CONTACT.phoneHref}`}><span>{c.form.phone}</span><bdi dir="ltr">{CONTACT.phone}</bdi></a></li>
+                <li><a href={`mailto:${CONTACT.email}`}><span>{c.form.email}</span><bdi dir="ltr">{CONTACT.email}</bdi></a></li>
+              </ul>
+              <a class="lp-book" href={`${home}#book`}>{u.book}</a>
+            </div>
+          </aside>
+        </div>
+      </section>
+    )}
+
+    {page && (
+      <section class="lp-faq" aria-labelledby="faq-title">
+        <div class="wrap lp-faq-wrap">
+          <h2 id="faq-title">{u.faq}</h2>
+          <div class="lp-faq-list">
+            {COPY[lang][slug].faq.map((f) => (
+              <details>
+                <summary>{f.q}</summary>
+                <p set:html={rich(f.a, lang)} />
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
+    {page && (
+      <section class="lp-related" aria-labelledby="rel-title">
+        <div class="wrap">
+          <h2 id="rel-title">{u.related}</h2>
+          <ul class="lp-cards">
+            {related.map((r) => (
+              <li><a class="lp-card cut" href={`${base}${landingHref(lang, r.slug)}`}><strong>{card(r.slug).name}</strong><span>{card(r.slug).teaser}</span></a></li>
+            ))}
+            <li><a class="lp-card lp-card-all cut" href={`${base}${landingHref(lang, HUB_SLUG)}`}><strong>{u.allServices}</strong><span>{HUB[lang].servicesLead}</span></a></li>
+          </ul>
+        </div>
+      </section>
+    )}
+
+    {isHub && (
+      <section class="lp-related lp-hub" aria-labelledby="hub-services">
+        <div class="wrap">
+          <h2 id="hub-services">{HUB[lang].servicesTitle}</h2>
+          <p class="lp-sub">{HUB[lang].servicesLead}</p>
+          <ul class="lp-cards">
+            {SERVICES.map((r) => (
+              <li><a class="lp-card cut" href={`${base}${landingHref(lang, r.slug)}`}><strong>{card(r.slug).name}</strong><span>{card(r.slug).teaser}</span></a></li>
+            ))}
+          </ul>
+          <h2 id="hub-regions" class="lp-hub-h">{HUB[lang].regionsTitle}</h2>
+          <p class="lp-sub">{HUB[lang].regionsLead}</p>
+          <ul class="lp-cards">
+            {REGIONS.map((r) => (
+              <li><a class="lp-card cut" href={`${base}${landingHref(lang, r.slug)}`}><strong>{card(r.slug).name}</strong><span>{card(r.slug).teaser}</span></a></li>
+            ))}
+          </ul>
+          {HUB[lang].other.map((p) => <p class="lp-sub lp-other">{p}</p>)}
+        </div>
+      </section>
+    )}
+
+    <section class="lp-cta" aria-labelledby="cta-title">
+      <div class="wrap lp-cta-row">
+        <div>
+          <h2 id="cta-title">{u.ctaTitle}</h2>
+          <p>{u.ctaLead}</p>
+        </div>
+        <div class="cta-row">
+          <a class="btn btn-amber" href={`${home}#contact`}>{u.quote}</a>
+          <a class="btn lp-btn-light" href={`${home}#book`}>{u.book}</a>
+          <a class="btn lp-btn-light" href={CONTACT.whatsapp} rel="noopener" target="_blank">{u.whatsapp}</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap"><FootLinks lang={lang} /></div>
+    <div class="wrap foot-row">
+      <Logo tone="light" />
+      <p>{c.footer.tag}</p>
+      <p><bdi dir="ltr">{CONTACT.email}</bdi> &nbsp;|&nbsp; <bdi dir="ltr">{CONTACT.phone}</bdi></p>
+      <a class="foot-link" href={`${base}/oxira-events-profile-2026.pdf`} download>{x[lang].profile.download}</a>
+      <a class="foot-link" href={`${home}privacy/`}>{x[lang].privacy.link}</a>
+      <p class="rights">© {new Date().getFullYear()} {c.footer.rights}</p>
+    </div>
+  </footer>
+
+  <Chat lang={lang} />
+</Base>
+
+<style is:global>
+  .lp-hero { padding-block: clamp(2rem, 5vw, 4rem) clamp(3rem, 6vw, 4.5rem); }
+  .lp-hero-grid { display: grid; grid-template-columns: 7fr 5fr; gap: 2rem clamp(2rem, 5vw, 4.5rem); align-items: center; }
+  .lp-hero h1 { font-size: clamp(1.9rem, 3.8vw, 3.1rem); line-height: 1.2; font-weight: 800; letter-spacing: -.02em; margin-bottom: 1.1rem; }
+  [dir='rtl'] .lp-hero h1 { letter-spacing: 0; line-height: 1.35; }
+  .lp-photo { margin: 0; background: var(--mist); }
+  .lp-photo img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+  @media (max-width: 900px) { .lp-hero-grid { grid-template-columns: 1fr; } .lp-photo { max-width: 560px; } }
+
+  .crumbs ol { list-style: none; margin: 0 0 1.2rem; padding: 0; display: flex; flex-wrap: wrap; gap: .35rem; font-size: .88rem; color: var(--ink-2); }
+  .crumbs li + li::before { content: '/'; margin-inline-end: .35rem; opacity: .5; }
+  .crumbs a { color: var(--blue-text); text-decoration: none; }
+  .crumbs a:hover { text-decoration: underline; }
+
+  .lp-body { background: var(--white); padding-block: clamp(3.5rem, 7vw, 5.5rem); }
+  .lp-body-grid { display: grid; grid-template-columns: minmax(0, 1fr) 21rem; gap: clamp(2rem, 5vw, 4.5rem); align-items: start; }
+  .lp-article { max-width: 46rem; }
+  .lp-article h2 { font-size: clamp(1.3rem, 2.2vw, 1.6rem); margin-top: 2.6rem; padding-inline-start: .9rem; border-inline-start: 4px solid var(--amber); }
+  .lp-article h2:first-child { margin-top: 0; }
+  .lp-article p { margin-top: .9rem; line-height: 1.95; font-size: 1.04rem; }
+  .lp-article ul { margin: .9rem 0 0; padding-inline-start: 1.25rem; display: grid; gap: .45rem; line-height: 1.8; }
+  .lp-article li::marker { color: var(--blue); }
+  .lp-article a, .lp-faq-list a { color: var(--blue-text); font-weight: 600; }
+  .lp-aside { position: sticky; top: 6rem; }
+  .lp-aside-card { background: var(--navy); color: #fff; padding: 1.75rem; display: grid; gap: .9rem; --cut: 22px; }
+  .lp-aside-h { font-weight: 700; font-size: 1.2rem; }
+  .lp-aside-card > p { color: #B9CBE0; font-size: .97rem; }
+  .lp-direct { list-style: none; margin: .25rem 0 0; padding: 0; border-top: 1px solid rgba(255,255,255,.18); }
+  .lp-direct a { display: flex; justify-content: space-between; gap: 1rem; padding: .7rem 0; border-bottom: 1px solid rgba(255,255,255,.18); text-decoration: none; font-size: .92rem; }
+  .lp-direct a span { color: #B9CBE0; }
+  .lp-direct a:hover bdi { color: var(--amber); }
+  .lp-book { color: var(--amber); font-weight: 600; font-size: .95rem; }
+  @media (max-width: 960px) { .lp-body-grid { grid-template-columns: 1fr; } .lp-aside { position: static; max-width: 30rem; } }
+
+  .lp-faq { background: var(--mist); padding-block: clamp(3.5rem, 7vw, 5.5rem); }
+  .lp-faq-wrap { max-width: 52rem; }
+  .lp-faq-list { margin-top: 1.75rem; border-top: 1px solid var(--line); }
+  .lp-faq-list details { border-bottom: 1px solid var(--line); }
+  .lp-faq-list summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1.15rem 0; font-weight: 600; font-size: 1.05rem; }
+  .lp-faq-list summary::-webkit-details-marker { display: none; }
+  .lp-faq-list summary::after { content: '+'; flex: none; width: 2rem; height: 2rem; display: grid; place-items: center; background: var(--amber); color: var(--navy); font-weight: 700; font-size: 1.2rem; }
+  .lp-faq-list details[open] summary::after { content: '−'; }
+  .lp-faq-list details p { padding: 0 0 1.25rem; color: var(--ink-2); line-height: 1.9; max-width: 44rem; }
+
+  .lp-related { background: var(--paper); padding-block: clamp(3.5rem, 7vw, 5rem); }
+  .lp-related h2 { font-size: clamp(1.5rem, 2.8vw, 2.1rem); }
+  .lp-cards { list-style: none; margin: 1.75rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: 14px; }
+  .lp-card { display: grid; gap: .45rem; height: 100%; padding: 1.4rem 1.4rem 1.5rem; background: #fff; border: 1px solid var(--line); text-decoration: none; --cut: 16px; transition: background-color .15s; }
+  .lp-card strong { font-size: 1.08rem; color: var(--navy); }
+  .lp-card span { color: var(--ink-2); font-size: .95rem; line-height: 1.7; }
+  .lp-card:hover { background: var(--mist); }
+  .lp-card:hover strong { color: var(--blue-text); }
+  .lp-card-all { background: var(--navy); border-color: var(--navy); }
+  .lp-card-all strong { color: var(--amber); }
+  .lp-card-all span { color: #B9CBE0; }
+  .lp-card-all:hover { background: var(--navy-2); }
+  .lp-card-all:hover strong { color: #FFBC2B; }
+  .lp-sub { margin-top: .7rem; color: var(--ink-2); font-size: 1.05rem; max-width: 46rem; }
+  .lp-hub-h { margin-top: 3.5rem; }
+  .lp-other { margin-top: 1.75rem; }
+
+  .lp-cta { background: var(--navy); color: #fff; padding-block: clamp(3.5rem, 7vw, 5rem); }
+  .lp-cta-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1.5rem 3rem; align-items: center; }
+  .lp-cta h2 { font-size: clamp(1.5rem, 2.8vw, 2.1rem); }
+  .lp-cta p { margin-top: .8rem; color: #B9CBE0; font-size: 1.05rem; max-width: 38rem; }
+  .lp-cta .cta-row { margin-top: 0; }
+  .lp-btn-light { background: transparent; color: #fff; box-shadow: inset 0 0 0 2px rgba(255,255,255,.6); clip-path: none; }
+  [dir='rtl'] .lp-btn-light { clip-path: none; }
+  .lp-btn-light:hover { background: #fff; color: var(--navy); }
+  @media (max-width: 900px) { .lp-cta-row { grid-template-columns: 1fr; } }
+</style>

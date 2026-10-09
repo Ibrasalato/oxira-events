@@ -1,0 +1,116 @@
+---
+// Chat widget (floating button + panel), shared by the home page and the service/region pages.
+import { t, N8N, type Lang } from '../i18n/content';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const c = t[lang];
+---
+<div class="chat" data-chat>
+  <button type="button" class="chat-fab" data-chat-toggle aria-label={c.chat.open} aria-expanded="false" aria-controls="chat-panel">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="9" cy="10.5" r="1.1" fill="currentColor"/><circle cx="12" cy="10.5" r="1.1" fill="currentColor"/><circle cx="15" cy="10.5" r="1.1" fill="currentColor"/></svg>
+    <span>{c.chat.open}</span>
+  </button>
+  <section id="chat-panel" class="chat-panel" role="dialog" aria-label={c.chat.title} hidden>
+    <header class="chat-head">
+      <svg class="logo-mark" viewBox="0 0 100 100" aria-hidden="true">
+        <polygon points="0,0 34.5,0 34.5,66 0,33" fill="#fff" />
+        <polygon points="66,0 100,0 100,33 34.5,33" fill="#F5A800" />
+        <polygon points="66,34 100,66 100,100 66,100" fill="#fff" />
+        <polygon points="0,66 66,66 34.5,100 0,100" fill="#4FB6E3" />
+      </svg>
+      <div>
+        <p class="chat-title">{c.chat.title}</p>
+        <p class="chat-status">{c.chat.status}</p>
+      </div>
+      <button type="button" class="chat-x" data-chat-toggle aria-label={c.chat.close}>×</button>
+    </header>
+    <ol class="chat-log" data-chat-log aria-live="polite">
+      <li class="msg bot">{c.chat.hello}</li>
+    </ol>
+    <div class="chips" data-chips>
+      {c.chat.chips.map((ch) => <button type="button" class="chip">{ch}</button>)}
+    </div>
+    <form class="chat-form" data-chat-form>
+      <label class="sr" for="chat-input">{c.chat.placeholder}</label>
+      <textarea id="chat-input" rows="1" maxlength="2000" placeholder={c.chat.placeholder}></textarea>
+      <button type="submit" aria-label={c.chat.send}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </form>
+  </section>
+</div>
+
+<script is:inline define:vars={{ lang, N8N, chatText: c.chat }}>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+  // Chat
+  const panel = $('#chat-panel');
+  const fab = $('.chat-fab');
+  const log = $('[data-chat-log]');
+  const input = $('#chat-input');
+  const chips = $('[data-chips]');
+  const KEY = 'oxira_events_sid';
+  let sid = '';
+  try { sid = sessionStorage.getItem(KEY) || ''; } catch {}
+  if (!sid) {
+    sid = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2)).replace(/-/g, '');
+    try { sessionStorage.setItem(KEY, sid); } catch {}
+  }
+  const setOpen = (open) => {
+    panel.hidden = !open;
+    fab.setAttribute('aria-expanded', String(open));
+    document.body.classList.toggle('chat-open', open);
+    if (open) setTimeout(() => input.focus(), 30); else fab.focus();
+  };
+  $$('[data-chat-toggle]').forEach((b) => b.addEventListener('click', () => setOpen(panel.hidden)));
+  $$('[data-open-chat]').forEach((b) => b.addEventListener('click', () => setOpen(true)));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) setOpen(false); });
+
+  const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const fmt = (s) => {
+    const lines = esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').split('\n');
+    let html = '', list = false;
+    for (const l of lines) {
+      const m = l.match(/^\s*[-•]\s+(.*)/);
+      if (m) { if (!list) { html += '<ul>'; list = true; } html += '<li>' + m[1] + '</li>'; continue; }
+      if (list) { html += '</ul>'; list = false; }
+      if (l.trim()) html += '<p>' + l + '</p>';
+    }
+    if (list) html += '</ul>';
+    return html;
+  };
+  const add = (who, text, isHtml) => {
+    const li = document.createElement('li');
+    li.className = 'msg ' + who;
+    li.dir = 'auto';
+    if (isHtml) li.innerHTML = text; else li.textContent = text;
+    log.append(li); log.scrollTop = log.scrollHeight;
+    return li;
+  };
+  let busy = false;
+  const send = async (text) => {
+    text = text.trim();
+    if (!text || busy) return;
+    busy = true; chips.hidden = true;
+    add('me', text);
+    input.value = ''; input.style.height = '';
+    const wait = add('bot typing', chatText.typing);
+    try {
+      const r = await fetch(N8N.chat, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sid, message: text, lang, page: location.pathname }) });
+      const j = await r.json();
+      wait.remove();
+      add('bot', fmt(j.reply || chatText.error), true);
+    } catch {
+      wait.remove();
+      add('bot err', chatText.error);
+    } finally { busy = false; input.focus(); }
+  };
+  $('[data-chat-form]').addEventListener('submit', (e) => { e.preventDefault(); send(input.value); });
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(input.value); } });
+  input.addEventListener('input', () => { input.style.height = ''; input.style.height = Math.min(input.scrollHeight, 120) + 'px'; });
+  $$('.chip', chips).forEach((b) => b.addEventListener('click', () => send(b.textContent)));
+})();
+</script>

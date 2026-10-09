@@ -1,0 +1,33 @@
+---
+// Crawlable footer links to the service and region pages. Those pages exist in Arabic and English only,
+// so the German, French and Russian footers link to the English versions.
+import { COPY, SERVICES, REGIONS, HUB_SLUG, UI, landingLang, landingHref } from '../i18n/landing';
+import type { Lang } from '../i18n/content';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const l = landingLang(lang);
+const u = UI[l];
+const other = l !== lang;
+---
+<nav class="foot-nav" aria-label={u.services} lang={other ? 'en' : undefined} dir={other ? 'ltr' : undefined}>
+  <div>
+    <p class="foot-h"><a href={landingHref(lang, HUB_SLUG)}>{u.footServices}</a></p>
+    <ul>{SERVICES.map((p) => <li><a href={landingHref(lang, p.slug)}>{COPY[l][p.slug].name}</a></li>)}</ul>
+  </div>
+  <div>
+    <p class="foot-h">{u.footRegions}</p>
+    <ul>{REGIONS.map((p) => <li><a href={landingHref(lang, p.slug)}>{COPY[l][p.slug].name}</a></li>)}</ul>
+  </div>
+</nav>
+
+<style is:global>
+  .foot-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem 3rem; padding-bottom: 2rem; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,.12); }
+  .foot-nav .foot-h { color: #fff; font-weight: 600; margin-bottom: .6rem; }
+  .foot-nav .foot-h a { color: #fff; text-decoration: none; }
+  .foot-nav .foot-h a:hover { color: var(--amber); }
+  .foot-nav ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: .35rem 1.5rem; }
+  .foot-nav ul a { color: #9FB3C9; text-decoration: none; }
+  .foot-nav ul a:hover { color: #fff; text-decoration: underline; }
+  @media (max-width: 640px) { .foot-nav { grid-template-columns: 1fr; } }
+</style>

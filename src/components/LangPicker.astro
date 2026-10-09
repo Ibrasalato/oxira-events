@@ -2,8 +2,10 @@
 // Language picker, same languages and flags as oxira.sa.
 import { languages, langPath, type Lang } from '../i18n/content';
 
-interface Props { lang: Lang }
-const { lang } = Astro.props;
+// `langs` limits the menu to the language versions that exist for this page (service and region pages: ar, en).
+interface Props { lang: Lang; langs?: Lang[] }
+const { lang, langs } = Astro.props;
+const options = langs ? languages.filter((l) => langs.includes(l.code)) : languages;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const current = languages.find((l) => l.code === lang)!;
 // Keep the visitor on the same page when switching language (e.g. /de/privacy/ -> /fr/privacy/).
@@ -12,16 +14,16 @@ const label: Record<Lang, string> = { ar: 'اللغة', en: 'Language', de: 'Spr
 ---
 <details class="lp">
   <summary aria-label={`${label[lang]}: ${current.name}`}>
-    <img class="lp-flag" src={`${base}/flags/${current.flag}.svg`} alt="" width="20" height="15" />
+    <span class="lp-flag" style={`background-image:url(${base}/flags/${current.flag}.svg)`} aria-hidden="true"></span>
     <span class="lp-name">{current.name}</span>
     <span class="lp-code" aria-hidden="true">{current.code.toUpperCase()}</span>
     <span class="lp-caret" aria-hidden="true"></span>
   </summary>
   <ul class="lp-menu" role="list">
-    {languages.map((l) => (
+    {options.map((l) => (
       <li>
         <a href={`${base}${langPath(l.code)}${rel}`} hreflang={l.code} lang={l.code} aria-current={l.code === lang ? 'true' : undefined}>
-          <img class="lp-flag" src={`${base}/flags/${l.flag}.svg`} alt="" width="20" height="15" loading="lazy" />
+          <span class="lp-flag" style={`background-image:url(${base}/flags/${l.flag}.svg)`} aria-hidden="true"></span>
           <span class={l.code !== lang && (l.code === 'ru' || lang === 'ru') ? 'lp-sys' : undefined}>{l.name}</span>
         </a>
       </li>
@@ -53,7 +55,7 @@ const label: Record<Lang, string> = { ar: 'اللغة', en: 'Language', de: 'Spr
   }
   .lp summary::-webkit-details-marker { display: none; }
   .lp summary:hover, .lp[open] summary { color: var(--navy); border-color: var(--line); background: #fff; }
-  .lp-flag { width: 20px; height: 15px; object-fit: cover; box-shadow: 0 0 0 1px rgba(10,37,62,.12); flex: none; }
+  .lp-flag { display: inline-block; width: 20px; height: 15px; background: center / cover no-repeat; box-shadow: 0 0 0 1px rgba(10,37,62,.12); flex: none; }
   .lp-code { display: none; }
   .lp-caret { width: .4em; height: .4em; border-bottom: 2px solid currentColor; border-inline-end: 2px solid currentColor; transform: translateY(-2px) rotate(45deg); opacity: .7; }
   .lp[open] .lp-caret { transform: translateY(2px) rotate(-135deg); }

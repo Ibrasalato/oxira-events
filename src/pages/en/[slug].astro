@@ -1,0 +1,10 @@
+---
+// English service and region pages (/en/exhibition-stands/, …) and the hub (/en/services/).
+import LandingPage from '../../components/LandingPage.astro';
+import { PAGES, HUB_SLUG } from '../../i18n/landing';
+
+export function getStaticPaths() {
+  return [HUB_SLUG, ...PAGES.map((p) => p.slug)].map((slug) => ({ params: { slug } }));
+}
+---
+<LandingPage lang="en" slug={Astro.params.slug!} />
