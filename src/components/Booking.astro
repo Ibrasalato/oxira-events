@@ -108,9 +108,10 @@ const locale = { ar: 'ar-u-nu-latn', en: 'en-GB', de: 'de-DE', fr: 'fr-FR', ru: 
     const btn = form.querySelector('[type=submit]');
     btn.disabled = true; btn.textContent = btn.dataset.sending; status.textContent = ''; status.className = 'f-status';
     try {
-      const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...d, lang, page: location.pathname }) });
+      const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...d, lang, page: location.pathname, source: window.oxSource?.() }) });
       const j = await r.json().catch(() => ({}));
       if (!r.ok || !j.success) throw new Error('fail');
+      window.oxTrack?.('generate_lead', { form: 'booking', channel: d.channel });
       form.reset();
       slotsEl.innerHTML = '';
       status.textContent = B.ok + ' ' + (j.id ?? '') + '. ' + B.okTail;

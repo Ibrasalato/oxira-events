@@ -3,13 +3,15 @@
 // Same header, footer, buttons, brand cut and chat widget as the home page; the quote form and booking
 // live on the home page, so CTAs link there (#contact, #book) or open the chat / WhatsApp.
 import Base from '../layouts/Base.astro';
+import '../styles/landing.css';
 import Logo from './Logo.astro';
 import LangPicker from './LangPicker.astro';
 import Chat from './Chat.astro';
 import FootLinks from './FootLinks.astro';
 import { t, WORK, CONTACT, langPath } from '../i18n/content';
 import { x } from '../i18n/extra';
-import { PAGES, SERVICES, REGIONS, COPY, HUB, HUB_SLUG, UI, LANDING_LANGS, landingHref, rich, plain, type LLang } from '../i18n/landing';
+import events from '../i18n/events.json';
+import { PAGES, SERVICES, REGIONS, VENUES, GUIDES, COPY, HUB, HUB_SLUG, UI, LANDING_LANGS, landingHref, rich, plain, type LLang } from '../i18n/landing';
 
 interface Props { lang: LLang; slug: string }
 const { lang, slug } = Astro.props;
@@ -40,12 +42,23 @@ const ld: unknown[] = [
 ];
 if (page) {
   const cp = COPY[lang][slug];
-  ld.push({
-    '@context': 'https://schema.org', '@type': 'Service',
-    name: cp.h1, serviceType: page.serviceType, description: cp.description, url: abs(slug),
-    provider: { '@type': 'Organization', ...org, name: 'Oxira Events', url: site },
-    areaServed: page.area, availableLanguage: ['ar', 'en'],
-  });
+  if (page.kind === 'guide') {
+    ld.push({
+      '@context': 'https://schema.org', '@type': 'Article',
+      headline: cp.h1, description: cp.description, url: abs(slug), inLanguage: lang,
+      image: `${site}/img/work/${page.img}-l.webp`, datePublished: page.date, dateModified: page.date,
+      author: { '@type': 'Organization', ...org, name: 'Oxira Events', url: site },
+      publisher: { '@type': 'Organization', ...org, name: 'Oxira Events', url: site, logo: { '@type': 'ImageObject', url: `${site}/favicon.svg` } },
+      mainEntityOfPage: abs(slug),
+    });
+  } else {
+    ld.push({
+      '@context': 'https://schema.org', '@type': 'Service',
+      name: cp.h1, serviceType: page.serviceType, description: cp.description, url: abs(slug),
+      provider: { '@type': 'Organization', ...org, name: 'Oxira Events', url: site },
+      areaServed: page.area, availableLanguage: ['ar', 'en'],
+    });
+  }
   ld.push({
     '@context': 'https://schema.org', '@type': 'FAQPage',
     mainEntity: cp.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: plain(f.a) } })),
@@ -53,11 +66,24 @@ if (page) {
 } else {
   ld.push({
     '@context': 'https://schema.org', '@type': 'ItemList', name: copy.h1,
-    itemListElement: [...SERVICES, ...REGIONS].map((p, i) => ({ '@type': 'ListItem', position: i + 1, name: COPY[lang][p.slug].name, url: abs(p.slug) })),
+    itemListElement: [...SERVICES, ...REGIONS, ...VENUES, ...GUIDES].map((p, i) => ({ '@type': 'ListItem', position: i + 1, name: COPY[lang][p.slug].name, url: abs(p.slug) })),
   });
 }
 const related = page ? page.related.map((s) => PAGES.find((p) => p.slug === s)!) : [];
 const card = (s: string) => COPY[lang][s];
+
+// Venue pages: upcoming shows at that venue, from the calendar (ended shows are hidden in the browser too).
+const ex = x[lang].cal;
+const locale = lang === 'ar' ? 'ar-u-ca-gregory-nu-latn' : 'en-GB';
+const dt = (s: string) => new Date(s + 'T00:00:00Z');
+const fmtDay = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', timeZone: 'UTC' });
+const fmtMonth = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' });
+const today = new Date().toISOString().slice(0, 10);
+const shows = page?.venue ? events.filter((e) => e.venue === page.venue && e.end >= today).sort((a, b) => a.start.localeCompare(b.start)) : [];
+const showName = (e: (typeof events)[number]) => (lang === 'ar' && e.name_ar ? e.name_ar : e.name);
+const showDates = (e: (typeof events)[number]) => `${fmtDay.format(dt(e.start))} – ${fmtDay.format(dt(e.end))}`;
+const planHref = (e: (typeof events)[number]) => `${home}?plan=${encodeURIComponent(showName(e))}&date=${encodeURIComponent(`${showDates(e)} ${fmtMonth.format(dt(e.start))}`)}#planner`;
+const pdf = page?.slug === 'exhibition-checklist' ? `${base}/oxira-events-exhibition-checklist-${lang}.pdf` : '';
 ---
 <Base lang={lang} page={`${slug}/`} langs={LANDING_LANGS} title={copy.title} description={copy.description} ld={ld}>
   <a class="skip" href="#main">{lang === 'ar' ? 'تخطَّ إلى المحتوى' : 'Skip to content'}</a>
@@ -93,6 +119,7 @@ const card = (s: string) => COPY[lang][s];
           <p class="kicker">{copy.kicker}</p>
           <h1 id="lp-title">{copy.h1}</h1>
           <p class="lead">{copy.lead}</p>
+          {page?.kind === 'guide' && page.date && <p class="lp-date">{u.guide} · {u.published} <time datetime={page.date}>{new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).format(dt(page.date))}</time></p>}
           <div class="cta-row">
             <a class="btn btn-amber" href={`${home}#contact`}>{u.quote}</a>
             <a class="btn btn-ghost" href={CONTACT.whatsapp} rel="noopener" target="_blank">{u.whatsapp}</a>
@@ -134,6 +161,45 @@ const card = (s: string) => COPY[lang][s];
               <a class="lp-book" href={`${home}#book`}>{u.book}</a>
             </div>
           </aside>
+        </div>
+      </section>
+    )}
+
+    {page?.kind === 'venue' && (
+      <section class="lp-shows" aria-labelledby="shows-title">
+        <div class="wrap">
+          <h2 id="shows-title">{u.upcoming}</h2>
+          <p class="lp-sub">{shows.length ? u.upcomingLead : u.upcomingNone}</p>
+          {shows.length > 0 && (
+            <ol class="lp-show-list">
+              {shows.map((e) => (
+                <li data-end={e.end}>
+                  <time datetime={e.start}>{showDates(e)}<small>{fmtMonth.format(dt(e.start))}</small></time>
+                  <div>
+                    <h3 lang={lang === 'ar' && e.name_ar ? 'ar' : 'en'}>{showName(e)}</h3>
+                    <p>{ex.sectors[e.sector as keyof typeof ex.sectors] ?? e.sector}</p>
+                  </div>
+                  <a class="btn btn-navy btn-sm" href={planHref(e)}>{u.planIt}</a>
+                </li>
+              ))}
+            </ol>
+          )}
+          <a class="lp-allshows" href={`${home}#calendar`}>{u.allShows}</a>
+        </div>
+      </section>
+    )}
+
+    {pdf && (
+      <section class="lp-shows" aria-labelledby="pdf-title">
+        <div class="wrap lp-pdf cut">
+          <div>
+            <h2 id="pdf-title">{u.checklistTitle}</h2>
+            <p>{u.checklistLead}</p>
+          </div>
+          <a class="btn btn-amber" href={pdf} download data-track="checklist_download">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 19h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            {u.checklistBtn}
+          </a>
         </div>
       </section>
     )}
@@ -185,6 +251,20 @@ const card = (s: string) => COPY[lang][s];
               <li><a class="lp-card cut" href={`${base}${landingHref(lang, r.slug)}`}><strong>{card(r.slug).name}</strong><span>{card(r.slug).teaser}</span></a></li>
             ))}
           </ul>
+          <h2 id="hub-venues" class="lp-hub-h">{HUB[lang].venuesTitle}</h2>
+          <p class="lp-sub">{HUB[lang].venuesLead}</p>
+          <ul class="lp-cards">
+            {VENUES.map((r) => (
+              <li><a class="lp-card cut" href={`${base}${landingHref(lang, r.slug)}`}><strong>{card(r.slug).name}</strong><span>{card(r.slug).teaser}</span></a></li>
+            ))}
+          </ul>
+          <h2 id="hub-guides" class="lp-hub-h">{HUB[lang].guidesTitle}</h2>
+          <p class="lp-sub">{HUB[lang].guidesLead}</p>
+          <ul class="lp-cards">
+            {GUIDES.map((r) => (
+              <li><a class="lp-card cut" href={`${base}${landingHref(lang, r.slug)}`}><strong>{card(r.slug).name}</strong><span>{card(r.slug).teaser}</span></a></li>
+            ))}
+          </ul>
           {HUB[lang].other.map((p) => <p class="lp-sub lp-other">{p}</p>)}
         </div>
       </section>
@@ -218,76 +298,5 @@ const card = (s: string) => COPY[lang][s];
   </footer>
 
   <Chat lang={lang} />
+  <script is:inline>document.querySelectorAll('[data-end]').forEach((r) => { if (r.dataset.end < new Date().toISOString().slice(0, 10)) r.remove(); });</script>
 </Base>
-
-<style is:global>
-  .lp-hero { padding-block: clamp(2rem, 5vw, 4rem) clamp(3rem, 6vw, 4.5rem); }
-  .lp-hero-grid { display: grid; grid-template-columns: 7fr 5fr; gap: 2rem clamp(2rem, 5vw, 4.5rem); align-items: center; }
-  .lp-hero h1 { font-size: clamp(1.9rem, 3.8vw, 3.1rem); line-height: 1.2; font-weight: 800; letter-spacing: -.02em; margin-bottom: 1.1rem; }
-  [dir='rtl'] .lp-hero h1 { letter-spacing: 0; line-height: 1.35; }
-  .lp-photo { margin: 0; background: var(--mist); }
-  .lp-photo img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
-  @media (max-width: 900px) { .lp-hero-grid { grid-template-columns: 1fr; } .lp-photo { max-width: 560px; } }
-
-  .crumbs ol { list-style: none; margin: 0 0 1.2rem; padding: 0; display: flex; flex-wrap: wrap; gap: .35rem; font-size: .88rem; color: var(--ink-2); }
-  .crumbs li + li::before { content: '/'; margin-inline-end: .35rem; opacity: .5; }
-  .crumbs a { color: var(--blue-text); text-decoration: none; }
-  .crumbs a:hover { text-decoration: underline; }
-
-  .lp-body { background: var(--white); padding-block: clamp(3.5rem, 7vw, 5.5rem); }
-  .lp-body-grid { display: grid; grid-template-columns: minmax(0, 1fr) 21rem; gap: clamp(2rem, 5vw, 4.5rem); align-items: start; }
-  .lp-article { max-width: 46rem; }
-  .lp-article h2 { font-size: clamp(1.3rem, 2.2vw, 1.6rem); margin-top: 2.6rem; padding-inline-start: .9rem; border-inline-start: 4px solid var(--amber); }
-  .lp-article h2:first-child { margin-top: 0; }
-  .lp-article p { margin-top: .9rem; line-height: 1.95; font-size: 1.04rem; }
-  .lp-article ul { margin: .9rem 0 0; padding-inline-start: 1.25rem; display: grid; gap: .45rem; line-height: 1.8; }
-  .lp-article li::marker { color: var(--blue); }
-  .lp-article a, .lp-faq-list a { color: var(--blue-text); font-weight: 600; }
-  .lp-aside { position: sticky; top: 6rem; }
-  .lp-aside-card { background: var(--navy); color: #fff; padding: 1.75rem; display: grid; gap: .9rem; --cut: 22px; }
-  .lp-aside-h { font-weight: 700; font-size: 1.2rem; }
-  .lp-aside-card > p { color: #B9CBE0; font-size: .97rem; }
-  .lp-direct { list-style: none; margin: .25rem 0 0; padding: 0; border-top: 1px solid rgba(255,255,255,.18); }
-  .lp-direct a { display: flex; justify-content: space-between; gap: 1rem; padding: .7rem 0; border-bottom: 1px solid rgba(255,255,255,.18); text-decoration: none; font-size: .92rem; }
-  .lp-direct a span { color: #B9CBE0; }
-  .lp-direct a:hover bdi { color: var(--amber); }
-  .lp-book { color: var(--amber); font-weight: 600; font-size: .95rem; }
-  @media (max-width: 960px) { .lp-body-grid { grid-template-columns: 1fr; } .lp-aside { position: static; max-width: 30rem; } }
-
-  .lp-faq { background: var(--mist); padding-block: clamp(3.5rem, 7vw, 5.5rem); }
-  .lp-faq-wrap { max-width: 52rem; }
-  .lp-faq-list { margin-top: 1.75rem; border-top: 1px solid var(--line); }
-  .lp-faq-list details { border-bottom: 1px solid var(--line); }
-  .lp-faq-list summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1.15rem 0; font-weight: 600; font-size: 1.05rem; }
-  .lp-faq-list summary::-webkit-details-marker { display: none; }
-  .lp-faq-list summary::after { content: '+'; flex: none; width: 2rem; height: 2rem; display: grid; place-items: center; background: var(--amber); color: var(--navy); font-weight: 700; font-size: 1.2rem; }
-  .lp-faq-list details[open] summary::after { content: '−'; }
-  .lp-faq-list details p { padding: 0 0 1.25rem; color: var(--ink-2); line-height: 1.9; max-width: 44rem; }
-
-  .lp-related { background: var(--paper); padding-block: clamp(3.5rem, 7vw, 5rem); }
-  .lp-related h2 { font-size: clamp(1.5rem, 2.8vw, 2.1rem); }
-  .lp-cards { list-style: none; margin: 1.75rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: 14px; }
-  .lp-card { display: grid; gap: .45rem; height: 100%; padding: 1.4rem 1.4rem 1.5rem; background: #fff; border: 1px solid var(--line); text-decoration: none; --cut: 16px; transition: background-color .15s; }
-  .lp-card strong { font-size: 1.08rem; color: var(--navy); }
-  .lp-card span { color: var(--ink-2); font-size: .95rem; line-height: 1.7; }
-  .lp-card:hover { background: var(--mist); }
-  .lp-card:hover strong { color: var(--blue-text); }
-  .lp-card-all { background: var(--navy); border-color: var(--navy); }
-  .lp-card-all strong { color: var(--amber); }
-  .lp-card-all span { color: #B9CBE0; }
-  .lp-card-all:hover { background: var(--navy-2); }
-  .lp-card-all:hover strong { color: #FFBC2B; }
-  .lp-sub { margin-top: .7rem; color: var(--ink-2); font-size: 1.05rem; max-width: 46rem; }
-  .lp-hub-h { margin-top: 3.5rem; }
-  .lp-other { margin-top: 1.75rem; }
-
-  .lp-cta { background: var(--navy); color: #fff; padding-block: clamp(3.5rem, 7vw, 5rem); }
-  .lp-cta-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1.5rem 3rem; align-items: center; }
-  .lp-cta h2 { font-size: clamp(1.5rem, 2.8vw, 2.1rem); }
-  .lp-cta p { margin-top: .8rem; color: #B9CBE0; font-size: 1.05rem; max-width: 38rem; }
-  .lp-cta .cta-row { margin-top: 0; }
-  .lp-btn-light { background: transparent; color: #fff; box-shadow: inset 0 0 0 2px rgba(255,255,255,.6); clip-path: none; }
-  [dir='rtl'] .lp-btn-light { clip-path: none; }
-  .lp-btn-light:hover { background: #fff; color: var(--navy); }
-  @media (max-width: 900px) { .lp-cta-row { grid-template-columns: 1fr; } }
-</style>

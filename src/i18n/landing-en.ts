@@ -746,6 +746,10 @@ const hub: HubCopy = {
   servicesLead: 'Each service can be ordered on its own or as part of a complete project run by one team.',
   regionsTitle: 'Where we work',
   regionsLead: 'We are based in Riyadh and serve shows across the Kingdom, plus Gulf and Egyptian companies exhibiting there.',
+  venuesTitle: 'Exhibition venues',
+  venuesLead: 'What to know about building a stand at the Kingdom’s main exhibition centres, and the shows coming up at each.',
+  guidesTitle: 'Exhibitor guides',
+  guidesLead: 'Practical guides to plan your show, choose the right stand and understand what drives its cost.',
   other: ['If you are exhibiting in Kuwait, Bahrain or Oman, send us the details; we assess each request individually and tell you what we can offer before any commitment.'],
 };
 

@@ -9,7 +9,7 @@ import '@fontsource/tajawal/arabic-500.css';
 import '@fontsource/tajawal/arabic-700.css';
 import '@fontsource/tajawal/arabic-800.css';
 import '../styles/global.css';
-import { t, languages, langPath, type Lang } from '../i18n/content';
+import { t, languages, langPath, ANALYTICS, type Lang } from '../i18n/content';
 import { x } from '../i18n/extra';
 
 // `langs`: the language versions that exist for this page (hreflang only lists those). Defaults to all.
@@ -62,6 +62,46 @@ const url = (l: Lang) => `${site}${langPath(l)}${page === '404' ? '' : page}`;
       knowsAbout: ['Exhibition stand design', 'Exhibition stand build', 'Conference stage production', 'Event lighting and sound', 'Event printing'],
     })} />
     {ld.map((o) => <script type="application/ld+json" set:html={JSON.stringify(o)} />)}
+    <script is:inline define:vars={{ ga4: ANALYTICS.ga4 }}>
+      // First-touch source (UTM, ad click id, referrer, landing page), kept 90 days and sent with every form,
+      // booking and chat so each lead shows where it came from. oxTrack() records conversions.
+      (() => {
+        const K = 'ox_src', now = Date.now();
+        let src = null;
+        try { src = JSON.parse(localStorage.getItem(K) || 'null'); } catch {}
+        const q = new URLSearchParams(location.search);
+        const utm = {};
+        ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid', 'fbclid', 'msclkid', 'li_fat_id'].forEach((k) => { if (q.get(k)) utm[k] = q.get(k).slice(0, 120); });
+        let ref = '';
+        try { const r = document.referrer && new URL(document.referrer); if (r && r.hostname !== location.hostname) ref = r.hostname; } catch {}
+        if (!src || now - src.ts > 90 * 864e5 || Object.keys(utm).length) {
+          const medium = utm.utm_medium || (utm.gclid || utm.msclkid ? 'cpc' : ref ? (/google|bing|yahoo|duckduckgo|yandex|baidu/.test(ref) ? 'organic' : 'referral') : 'direct');
+          src = { ...utm, source: utm.utm_source || (utm.gclid ? 'google' : ref || 'direct'), medium, referrer: ref, landing: location.pathname, ts: now };
+          try { localStorage.setItem(K, JSON.stringify(src)); } catch {}
+        }
+        window.oxSource = () => { const { ts, ...rest } = src; return { ...rest, first_seen: new Date(ts).toISOString().slice(0, 10), page: location.pathname }; };
+        window.dataLayer = window.dataLayer || [];
+        window.oxTrack = (event, params = {}) => {
+          window.dataLayer.push({ event, ...params });
+          if (window.gtag) window.gtag('event', event, params);
+        };
+        document.addEventListener('click', (e) => {
+          const a = e.target.closest && e.target.closest('a, [data-track]');
+          if (!a) return;
+          const h = a.getAttribute('href') || '';
+          if (a.dataset.track) oxTrack(a.dataset.track);
+          else if (/wa\.me|whatsapp/.test(h)) oxTrack('whatsapp_click');
+          else if (h.startsWith('tel:')) oxTrack('phone_click');
+          else if (h.startsWith('mailto:')) oxTrack('email_click');
+          else if (/\.pdf$/.test(h)) oxTrack('file_download', { file_name: h.split('/').pop() });
+        }, { capture: true });
+        if (ga4) addEventListener('load', () => setTimeout(() => {
+          window.gtag = function () { window.dataLayer.push(arguments); };
+          gtag('js', new Date()); gtag('config', ga4, { anonymize_ip: true });
+          const sc = document.createElement('script'); sc.async = true; sc.src = 'https://www.googletagmanager.com/gtag/js?id=' + ga4; document.head.append(sc);
+        }, 1500));
+      })();
+    </script>
   </head>
   <body>
     <slot />

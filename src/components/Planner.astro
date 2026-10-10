@@ -310,8 +310,16 @@ const evName = (ev: (typeof events)[number]) => (lang === 'ar' && ev.name_ar ? e
     document.getElementById('planner').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   }));
 
+  // Show picked on a venue page (/?plan=<show>&date=<dates>#planner)
+  const qp = new URLSearchParams(location.search);
+  if (qp.get('plan')) {
+    form.event.value = qp.get('plan');
+    if (form.event.value) { eventDate = qp.get('date') || ''; update(); }
+  }
+
   // Planner → quote form
   document.querySelector('[data-plan-apply]').addEventListener('click', () => {
+    window.oxTrack?.('planner_apply');
     const s = state();
     const q = document.querySelector('[data-quote]');
     q.stand_size.value = `${s.size}${s.plus ? '+' : ''}`;

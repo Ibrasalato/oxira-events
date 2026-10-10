@@ -9,6 +9,8 @@ import FootLinks from './FootLinks.astro';
 import { x } from '../i18n/extra';
 import { t, WORK, AISLE, CONTACT, N8N, langPath, type Lang } from '../i18n/content';
 import { UI, HUB_SLUG, landingLang, landingHref } from '../i18n/landing';
+import { STATS, CLIENTS, TESTIMONIALS, ACCREDITATIONS, COMPANY, PROOF_TXT } from '../i18n/proof';
+import { visibleProjects } from '../i18n/projects';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -20,6 +22,11 @@ const FIRST = 12;
 // Service cards link to their own pages (Arabic and English only; other languages get the English page).
 const SERVICE_PAGES = [['exhibition-stands', 'conference-stages'], ['lighting-sound-led-screens'], ['media-production'], ['printing-acrylic'], ['promotional-giveaways'], []];
 const lu = UI[landingLang(lang)];
+const pf = PROOF_TXT[lang];
+// Case studies exist in Arabic and English; other languages link to the English page.
+const cases = visibleProjects(import.meta.env.DEV).slice(0, 3);
+const caseHref = (slug: string) => `${base}${landingLang(lang) === 'ar' ? '/' : '/en/'}work/${slug}/`;
+const caseLang = landingLang(lang);
 ---
 <a class="skip" href="#main">{({ ar: 'تخطَّ إلى المحتوى', en: 'Skip to content', de: 'Zum Inhalt springen', fr: 'Aller au contenu', ru: 'Перейти к содержимому' })[lang]}</a>
 
@@ -79,6 +86,24 @@ const lu = UI[landingLang(lang)];
     </div>
   </section>
 
+  {(STATS.length > 0 || CLIENTS.length > 0) && (
+    <section class="proof" aria-label={pf.stats}>
+      <div class="wrap">
+        {STATS.length > 0 && (
+          <dl class="stats">
+            {STATS.map((st) => <div><dt>{st.label[lang]}</dt><dd>{st.value}</dd></div>)}
+          </dl>
+        )}
+        {CLIENTS.length > 0 && (
+          <div class="clients">
+            <p class="clients-h">{pf.clients}</p>
+            <ul>{CLIENTS.map((cl) => <li><img src={`${base}${cl.logo}`} alt={cl.name} loading="lazy" decoding="async" height="44" /></li>)}</ul>
+          </div>
+        )}
+      </div>
+    </section>
+  )}
+
   <section id="services" class="services" aria-labelledby="services-title">
     <div class="wrap">
       <div class="services-head">
@@ -111,6 +136,21 @@ const lu = UI[landingLang(lang)];
         <p>{c.work.lead}</p>
         <p class="work-count"><strong>{WORK.length}</strong> {c.work.count}</p>
       </div>
+      {cases.length > 0 && (
+        <div class="cases">
+          <div class="cases-head"><h3>{pf.caseStudies}</h3><p>{pf.caseLead}</p></div>
+          <ul>
+            {cases.map((p) => { const w = WORK.find((q) => q.id === p.cover); return (
+              <li><a class="case cut" href={caseHref(p.slug)} hreflang={caseLang === lang ? undefined : 'en'}>
+                <img src={img(`work/${p.cover}-s.webp`)} width={w?.w ?? 720} height={w?.h ?? 495} alt="" loading="lazy" decoding="async" />
+                <span class="case-meta">{p.client} · {p.event[caseLang]}</span>
+                <strong lang={caseLang}>{p[caseLang].title}</strong>
+                <span class="case-go">{pf.read}</span>
+              </a></li>
+            ); })}
+          </ul>
+        </div>
+      )}
       <ul class="gallery" data-gallery>
         {WORK.map((w, i) => (
           <li class={i >= FIRST ? 'g-item is-extra' : 'g-item'} style={`--ar:${w.w}/${w.h}`}>
@@ -126,6 +166,22 @@ const lu = UI[landingLang(lang)];
       </div>
     </div>
   </section>
+
+  {TESTIMONIALS.length > 0 && (
+    <section class="testi" aria-labelledby="testi-title">
+      <div class="wrap">
+        <h2 id="testi-title">{pf.says}</h2>
+        <ul>
+          {TESTIMONIALS.map((q) => (
+            <li class="cut" lang={q.lang} dir={q.lang === 'ar' ? 'rtl' : 'ltr'}>
+              <blockquote>“{q.quote}”</blockquote>
+              <p><strong>{q.name}</strong><span>{q.role} · {q.company}</span></p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
 
   <section class="process" aria-labelledby="process-title">
     <div class="wrap">
@@ -162,6 +218,12 @@ const lu = UI[landingLang(lang)];
             <dd>{c.about.vision}</dd>
           </div>
         </dl>
+        {ACCREDITATIONS.length > 0 && (
+          <div class="accred">
+            <p class="accred-h">{pf.accred}</p>
+            <ul>{ACCREDITATIONS.map((a) => <li>{a.logo && <img src={`${base}${a.logo}`} alt="" height="36" loading="lazy" />}<span><strong>{a.name[lang]}</strong>{a.detail && <small>{a.detail[lang]}</small>}</span></li>)}</ul>
+          </div>
+        )}
         <a class="btn btn-ghost profile-dl" href={`${base}/oxira-events-profile-2026.pdf`} download>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 19h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           {x[lang].profile.download} <small>PDF · 4 MB</small>
@@ -231,6 +293,7 @@ const lu = UI[landingLang(lang)];
     <p><bdi dir="ltr">{CONTACT.email}</bdi> &nbsp;|&nbsp; <bdi dir="ltr">{CONTACT.phone}</bdi></p>
     <a class="foot-link" href={`${base}/oxira-events-profile-2026.pdf`} download>{x[lang].profile.download}</a>
     <a class="foot-link" href={`${base}${langPath(lang)}privacy/`}>{x[lang].privacy.link}</a>
+    {(COMPANY.cr || COMPANY.vat) && <p class="reg">{COMPANY.cr && <span>{pf.cr}: <bdi dir="ltr">{COMPANY.cr}</bdi></span>}{COMPANY.vat && <span>{pf.vat}: <bdi dir="ltr">{COMPANY.vat}</bdi></span>}</p>}
     <p class="rights">© {new Date().getFullYear()} {c.footer.rights}</p>
   </div>
 </footer>
@@ -311,11 +374,12 @@ const lu = UI[landingLang(lang)];
       if (window.__standApplied && window.__standExport) {
         try { design = await window.__standExport(); } catch { design = null; }
       }
-      const payload = { ...d, lang, page: location.pathname };
+      const payload = { ...d, lang, page: location.pathname, source: window.oxSource?.() };
       if (design) { payload.design = design.config; payload.files = design.files; }
       const r = await fetch(N8N.form, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       const j = await r.json().catch(() => ({}));
       if (!r.ok || !j.success) throw new Error('fail');
+      window.oxTrack?.('generate_lead', { form: 'quote', with_3d: !!design });
       form.reset();
       window.__standApplied = false;
       status.textContent = formText.ok + ' ' + (j.id ?? '') + '. ' + formText.okTail;

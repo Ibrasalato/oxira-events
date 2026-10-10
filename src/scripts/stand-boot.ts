@@ -203,6 +203,7 @@ export function boot() {
   let arUrl = '';
   document.querySelector('[data-stand-ar]')?.addEventListener('click', async () => {
     if (!dlg) return;
+    (window as any).oxTrack?.('ar_open');
     const stage = dlg.querySelector<HTMLElement>('[data-ar-stage]')!;
     const hint = dlg.querySelector<HTMLElement>('[data-ar-hint]')!;
     stage.querySelectorAll('model-viewer').forEach((m) => m.remove());

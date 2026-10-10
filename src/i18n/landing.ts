@@ -3,6 +3,10 @@
 import type { Lang } from './content';
 import { ar } from './landing-ar';
 import { en } from './landing-en';
+import { venuesAr } from './landing-venues-ar';
+import { venuesEn } from './landing-venues-en';
+import { guidesAr } from './landing-guides-ar';
+import { guidesEn } from './landing-guides-en';
 
 export type LLang = 'ar' | 'en';
 /** Languages the landing pages exist in. hreflang, the language menu and the sitemap only list these. */
@@ -23,12 +27,14 @@ export type Copy = {
   blocks: Block[];
   faq: { q: string; a: string }[];
 };
-export type HubCopy = Omit<Copy, 'blocks' | 'faq'> & { servicesTitle: string; servicesLead: string; regionsTitle: string; regionsLead: string; other: string[] };
+export type HubCopy = Omit<Copy, 'blocks' | 'faq'> & { servicesTitle: string; servicesLead: string; regionsTitle: string; regionsLead: string; venuesTitle: string; venuesLead: string; guidesTitle: string; guidesLead: string; other: string[] };
 
 type Place = { '@type': 'Country' | 'City' | 'State' | 'AdministrativeArea'; name: string };
 export type Landing = {
   slug: string;
-  kind: 'service' | 'region';
+  kind: 'service' | 'region' | 'venue' | 'guide';
+  venue?: string;       // venue code in events.json (venue pages list its upcoming shows)
+  date?: string;        // guides: first published (ISO date)
   img: string;          // portfolio photo id (public/img/work/<id>-s.webp)
   serviceType: string;  // schema.org Service.serviceType (English)
   area: Place[];        // schema.org areaServed
@@ -51,12 +57,22 @@ export const PAGES: Landing[] = [
   { slug: 'exhibition-stands-uae', kind: 'region', img: '15', serviceType: 'Exhibition stand design and build', area: [{ '@type': 'Country', name: 'United Arab Emirates' }, { '@type': 'City', name: 'Dubai' }, { '@type': 'City', name: 'Abu Dhabi' }, KSA], related: ['exhibition-stands', 'exhibition-stands-riyadh', 'exhibition-stands-qatar', 'media-production'] },
   { slug: 'exhibition-stands-qatar', kind: 'region', img: '36', serviceType: 'Exhibition stand design and build', area: [{ '@type': 'Country', name: 'Qatar' }, { '@type': 'City', name: 'Doha' }, KSA], related: ['exhibition-stands', 'conference-stages', 'exhibition-stands-eastern-province', 'exhibition-stands-uae'] },
   { slug: 'exhibition-stands-egypt', kind: 'region', img: '17', serviceType: 'Exhibition stand design and build', area: [{ '@type': 'Country', name: 'Egypt' }, { '@type': 'City', name: 'Cairo' }, KSA], related: ['exhibition-stands', 'exhibition-stands-riyadh', 'exhibition-stands-jeddah', 'promotional-giveaways'] },
+  { slug: 'riyadh-front-exhibition-center', kind: 'venue', venue: 'RFECC', img: '39', serviceType: 'Exhibition stand design and build', area: [{ '@type': 'City', name: 'Riyadh' }], related: ['exhibition-stands-riyadh', 'riyadh-exhibition-center-malham', 'riyadh-international-convention-center', 'exhibition-checklist'] },
+  { slug: 'riyadh-international-convention-center', kind: 'venue', venue: 'RICEC', img: '15', serviceType: 'Exhibition stand design and build', area: [{ '@type': 'City', name: 'Riyadh' }], related: ['exhibition-stands-riyadh', 'riyadh-front-exhibition-center', 'riyadh-exhibition-center-malham', 'exhibition-stand-types'] },
+  { slug: 'riyadh-exhibition-center-malham', kind: 'venue', venue: 'Malham (RECC)', img: '8', serviceType: 'Exhibition stand design and build', area: [{ '@type': 'City', name: 'Riyadh' }], related: ['exhibition-stands-riyadh', 'riyadh-front-exhibition-center', 'riyadh-international-convention-center', 'exhibition-stand-cost-guide'] },
+  { slug: 'jeddah-exhibition-center', kind: 'venue', venue: 'JIECC', img: '14', serviceType: 'Exhibition stand design and build', area: [{ '@type': 'City', name: 'Jeddah' }], related: ['exhibition-stands-jeddah', 'exhibition-stands', 'exhibition-checklist', 'riyadh-front-exhibition-center'] },
+  { slug: 'dhahran-expo', kind: 'venue', venue: 'Dhahran Expo', img: '46', serviceType: 'Exhibition stand design and build', area: [{ '@type': 'City', name: 'Dhahran' }, { '@type': 'AdministrativeArea', name: 'Eastern Province, Saudi Arabia' }], related: ['exhibition-stands-eastern-province', 'exhibition-stands', 'lighting-sound-led-screens', 'exhibition-checklist'] },
+  { slug: 'exhibition-stand-cost-guide', kind: 'guide', date: '2026-10-10', img: '9', serviceType: 'Exhibition stand design and build', area: [KSA], related: ['exhibition-stand-types', 'exhibition-checklist', 'exhibition-stands', 'printing-acrylic'] },
+  { slug: 'exhibition-checklist', kind: 'guide', date: '2026-10-10', img: '25', serviceType: 'Exhibition stand design and build', area: [KSA], related: ['exhibition-stand-cost-guide', 'exhibition-stand-types', 'exhibition-stands', 'lighting-sound-led-screens'] },
+  { slug: 'exhibition-stand-types', kind: 'guide', date: '2026-10-10', img: '34', serviceType: 'Exhibition stand design and build', area: [KSA], related: ['exhibition-stand-cost-guide', 'exhibition-checklist', 'exhibition-stands', 'conference-stages'] },
 ];
 export const HUB_SLUG = 'services';
 export const SERVICES = PAGES.filter((p) => p.kind === 'service');
 export const REGIONS = PAGES.filter((p) => p.kind === 'region');
+export const VENUES = PAGES.filter((p) => p.kind === 'venue');
+export const GUIDES = PAGES.filter((p) => p.kind === 'guide');
 
-export const COPY: Record<LLang, Record<string, Copy>> = { ar: ar.pages, en: en.pages };
+export const COPY: Record<LLang, Record<string, Copy>> = { ar: { ...ar.pages, ...venuesAr, ...guidesAr }, en: { ...en.pages, ...venuesEn, ...guidesEn } };
 export const HUB: Record<LLang, HubCopy> = { ar: ar.hub, en: en.hub };
 
 export const UI = {
@@ -69,6 +85,10 @@ export const UI = {
     asideTitle: 'عرض سعر لمشروعك', asideLead: 'أرسل تفاصيل معرضك أو فعاليتك ونرد عليك بالتصميم والتكلفة.',
     photo: 'جناح عارض من أعمالنا', footServices: 'خدماتنا', footRegions: 'أين نعمل', allServices: 'كل الخدمات',
     homeServices: 'كل الخدمات والمدن التي نخدمها',
+    footVenues: 'قاعات المعارض', footGuides: 'أدلة العارضين',
+    upcoming: 'معارض قادمة في هذا المركز', upcomingLead: 'من تقويم المعارض لدينا. اضغط على أي معرض لتبدأ تخطيط جناحك له.', upcomingNone: 'لا توجد معارض قادمة مسجلة في تقويمنا لهذا المركز حالياً.', planIt: 'خطّط جناحي', allShows: 'كل المعارض القادمة',
+    checklistTitle: 'نسخة قابلة للطباعة', checklistLead: 'حمّل القائمة كملف PDF واطبعها لفريقك، وعلّم على كل بند عند إنجازه.', checklistBtn: 'حمّل قائمة التجهيز (PDF)',
+    published: 'نُشر في', guide: 'دليل',
   },
   en: {
     home: 'Home', services: 'Services', navPlanner: 'Design your stand', work: 'Work', about: 'About', contact: 'Contact',
@@ -79,6 +99,10 @@ export const UI = {
     asideTitle: 'Get a quote for your project', asideLead: 'Send us your show or event details and we will come back with a design and a cost.',
     photo: 'An exhibition stand from our portfolio', footServices: 'Services', footRegions: 'Where we work', allServices: 'All services',
     homeServices: 'All services and the places we work',
+    footVenues: 'Exhibition venues', footGuides: 'Exhibitor guides',
+    upcoming: 'Upcoming shows at this venue', upcomingLead: 'From our show calendar. Pick a show to start planning your stand for it.', upcomingNone: 'No upcoming shows at this venue are in our calendar right now.', planIt: 'Plan my stand', allShows: 'All upcoming shows',
+    checklistTitle: 'Printable version', checklistLead: 'Download the checklist as a PDF, print it for your team and tick each item as you go.', checklistBtn: 'Download the checklist (PDF)',
+    published: 'Published', guide: 'Guide',
   },
 } as const;
 

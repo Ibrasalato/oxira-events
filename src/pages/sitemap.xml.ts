@@ -1,4 +1,5 @@
 import { languages, langPath, type Lang } from '../i18n/content';
+import { visibleProjects } from '../i18n/projects';
 import { PAGES, HUB_SLUG, LANDING_LANGS, LANDING_LASTMOD } from '../i18n/landing';
 
 const site = 'https://events.oxira.sa';
@@ -8,7 +9,8 @@ const pages: { path: string; langs: Lang[]; priority: string; lastmod?: string }
   { path: '', langs: all, priority: '1.0' },
   { path: 'privacy/', langs: all, priority: '0.3' },
   { path: `${HUB_SLUG}/`, langs: LANDING_LANGS, priority: '0.8', lastmod: LANDING_LASTMOD },
-  ...PAGES.map((p) => ({ path: `${p.slug}/`, langs: LANDING_LANGS, priority: p.kind === 'service' ? '0.8' : '0.7', lastmod: LANDING_LASTMOD })),
+  ...PAGES.map((p) => ({ path: `${p.slug}/`, langs: LANDING_LANGS, priority: p.kind === 'service' ? '0.8' : p.kind === 'guide' ? '0.6' : '0.7', lastmod: LANDING_LASTMOD })),
+  ...visibleProjects(false).map((p) => ({ path: `work/${p.slug}/`, langs: LANDING_LANGS, priority: '0.6' })),
 ];
 
 export function GET() {

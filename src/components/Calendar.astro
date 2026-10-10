@@ -103,8 +103,8 @@ const FIRST = 8;
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || !sectors.length) { msg.textContent = c.t.missing; msg.classList.add('is-err'); return; }
       btn.disabled = true; btn.textContent = c.t.sending; msg.classList.remove('is-err');
       try {
-        const r = await (await fetch(c.url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, sectors, lang: c.lang }) })).json();
-        if (r.success) { msg.textContent = c.t.ok; af.reset(); }
+        const r = await (await fetch(c.url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, sectors, lang: c.lang, source: window.oxSource?.() }) })).json();
+        if (r.success) { msg.textContent = c.t.ok; af.reset(); window.oxTrack?.('sign_up', { method: 'show_alerts' }); }
         else { msg.textContent = r.reason === 'invalid' ? c.t.missing : c.t.err; msg.classList.add('is-err'); }
       } catch { msg.textContent = c.t.err; msg.classList.add('is-err'); }
       btn.disabled = false; btn.textContent = c.t.submit;

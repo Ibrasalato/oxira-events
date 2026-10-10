@@ -12,6 +12,10 @@ export const languages: { code: Lang; name: string; flag: string; locale: string
 ];
 export const langPath = (l: Lang) => (l === 'ar' ? '/' : `/${l}/`);
 
+/** Analytics. Leave ga4 empty to load nothing; set a GA4 measurement ID (G-XXXXXXXXXX) to turn it on.
+ *  Conversions are always pushed to window.dataLayer, so Google Tag Manager can also pick them up. */
+export const ANALYTICS = { ga4: '' };
+
 export const N8N = {
   chat: 'https://api.oxira.sa/oxira-events-chat',
   form: 'https://api.oxira.sa/oxira-events-contact',

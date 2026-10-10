@@ -47,3 +47,11 @@ Add a CNAME record: host `events` → `ibrasalato.github.io`. Then in the repo's
 - Quote requests with an email address get a confirmation in the page language (`n8n/client-email.js`).
 - AR: the 3D planner exports the current stand as GLB and opens it in `<model-viewer>` (WebXR / Scene Viewer on Android, Quick Look on iPhone) at real scale.
 - `public/oxira-events-profile-2026.pdf` is a web-compressed copy of the company profile.
+
+## Venues, guides, case studies, proof and tracking
+- Venue pages (RFECC, RICEC, Malham, JIECC, Dhahran Expo) and exhibitor guides use the landing-page system: structure in `src/i18n/landing.ts`, copy in `landing-venues-*.ts` / `landing-guides-*.ts`. Venue pages list that venue's upcoming shows from `events.json` and link each to the planner (`/?plan=<show>#planner`).
+- Printable checklist PDFs: `public/oxira-events-exhibition-checklist-{ar,en}.pdf`, built from `src/i18n/checklist.ts`.
+- Case studies: `src/i18n/projects.ts` → `/work/<slug>/`. Only `published: true` entries are built; drafts show in `npm run dev`.
+- Trust signals (numbers, client logos, testimonials, accreditations, CR/VAT): `src/i18n/proof.ts`. Each section stays hidden until filled.
+- Lead source: the site stores the first-touch source (UTM, ad click id, referrer, landing page) for 90 days and sends it with quotes, bookings, chat and alerts. n8n saves it in the `source` column and shows it in team emails.
+- Analytics: conversions are pushed to `window.dataLayer` (generate_lead, chat_start, planner_apply, ar_open, whatsapp_click, phone_click, file_download, sign_up). Set `ANALYTICS.ga4` in `src/i18n/content.ts` to load GA4.

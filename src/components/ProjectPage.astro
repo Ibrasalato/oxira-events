@@ -1,0 +1,192 @@
+---
+// Case-study page (/work/<slug>/ and /en/work/<slug>/). Data in src/i18n/projects.ts.
+import Base from '../layouts/Base.astro';
+import Logo from './Logo.astro';
+import LangPicker from './LangPicker.astro';
+import Chat from './Chat.astro';
+import FootLinks from './FootLinks.astro';
+import '../styles/landing.css';
+import { t, WORK, CONTACT, langPath } from '../i18n/content';
+import { x } from '../i18n/extra';
+import { COPY, HUB_SLUG, UI, LANDING_LANGS, landingHref, type LLang } from '../i18n/landing';
+import { PROJECTS, PROJECT_TXT, visibleProjects } from '../i18n/projects';
+
+interface Props { lang: LLang; slug: string }
+const { lang, slug } = Astro.props;
+const site = 'https://events.oxira.sa';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const c = t[lang];
+const u = UI[lang];
+const pt = PROJECT_TXT[lang];
+const home = `${base}${langPath(lang)}`;
+const p = PROJECTS.find((q) => q.slug === slug)!;
+const cp = p[lang];
+const url = `${site}${langPath(lang)}work/${slug}/`;
+const photo = (id: string) => WORK.find((w) => w.id === id) ?? { id, w: 1400, h: 960, brand: undefined };
+const cover = photo(p.cover);
+const others = visibleProjects(import.meta.env.DEV).filter((q) => q.slug !== slug).slice(0, 3);
+
+const facts: [string, string][] = [
+  [pt.client, p.client],
+  [pt.event, p.event[lang]],
+  [pt.city, p.city[lang]],
+  ...(p.venue ? [[pt.venue, p.venue[lang]] as [string, string]] : []),
+  [pt.year, String(p.year)],
+  ...(p.sizeM2 ? [[pt.size, `${p.sizeM2} ${pt.m2}`] as [string, string]] : []),
+  ...(p.openSides ? [[pt.sides, pt.sideN(p.openSides)] as [string, string]] : []),
+  ...(p.build ? [[pt.build, pt.builds[p.build]] as [string, string]] : []),
+  ...(p.buildDays ? [[pt.days, pt.daysN(p.buildDays)] as [string, string]] : []),
+];
+const crumbs = [
+  { name: u.home, url: `${site}${langPath(lang)}` },
+  { name: c.work.title, url: `${site}${langPath(lang)}#work` },
+  { name: cp.title, url },
+];
+const ld = [
+  { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: crumbs.map((b, i) => ({ '@type': 'ListItem', position: i + 1, name: b.name, item: b.url })) },
+  {
+    '@context': 'https://schema.org', '@type': 'Article', headline: cp.title, description: cp.summary, url, inLanguage: lang,
+    image: `${site}/img/work/${p.cover}-l.webp`, datePublished: `${p.year}-01-01`,
+    author: { '@type': 'Organization', '@id': `${site}/#org`, name: 'Oxira Events', url: site },
+    publisher: { '@type': 'Organization', '@id': `${site}/#org`, name: 'Oxira Events', url: site },
+    about: { '@type': 'Organization', name: p.client },
+    ...(p.testimonial ? { review: { '@type': 'Review', reviewBody: p.testimonial.quote, author: { '@type': 'Person', name: p.testimonial.name } } } : {}),
+  },
+];
+---
+<Base lang={lang} page={`work/${slug}/`} langs={LANDING_LANGS} title={`${cp.title} | Oxira Events`} description={cp.summary} ld={ld} noindex={!p.published}>
+  <a class="skip" href="#main">{lang === 'ar' ? 'تخطَّ إلى المحتوى' : 'Skip to content'}</a>
+  {!p.published && <p class="cs-draft">{pt.draft}</p>}
+
+  <header class="top">
+    <div class="wrap top-row">
+      <a href={home} aria-label="Oxira Events"><Logo /></a>
+      <nav class="nav" aria-label={c.nav.services}>
+        <a href={`${base}${landingHref(lang, HUB_SLUG)}`}>{c.nav.services}</a>
+        <a href={`${home}#planner`}>{x[lang].cta.navPlanner}</a>
+        <a href={`${home}#work`}>{c.nav.work}</a>
+        <a href={`${home}#about`}>{c.nav.about}</a>
+        <a href={`${home}#contact`}>{c.nav.contact}</a>
+      </nav>
+      <div class="top-actions">
+        <LangPicker lang={lang} langs={LANDING_LANGS} />
+        <a class="btn btn-amber btn-sm" href={`${home}#contact`}>{c.quote}</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="lp-hero" aria-labelledby="cs-title">
+      <div class="wrap lp-hero-grid">
+        <div>
+          <nav class="crumbs" aria-label={lang === 'ar' ? 'مسار التنقل' : 'Breadcrumb'}>
+            <ol>{crumbs.map((b, i) => <li>{i < crumbs.length - 1 ? <a href={b.url.replace(site, base)}>{b.name}</a> : <span aria-current="page">{b.name}</span>}</li>)}</ol>
+          </nav>
+          <p class="kicker">{pt.kicker} · {p.client}</p>
+          <h1 id="cs-title">{cp.title}</h1>
+          <p class="lead">{cp.summary}</p>
+        </div>
+        <figure class="lp-photo cut">
+          <img src={`${base}/img/work/${cover.id}-l.webp`} width={cover.w} height={cover.h} alt={`${c.work.stand}: ${p.client}`} fetchpriority="high" decoding="async" />
+        </figure>
+      </div>
+    </section>
+
+    <section class="lp-body">
+      <div class="wrap lp-body-grid">
+        <article class="lp-article">
+          <h2>{pt.challenge}</h2>
+          {cp.challenge.map((s) => <p>{s}</p>)}
+          <h2>{pt.solution}</h2>
+          {cp.solution.map((s) => <p>{s}</p>)}
+          <h2>{pt.result}</h2>
+          {cp.result.map((s) => <p>{s}</p>)}
+          {p.testimonial && (
+            <blockquote class="cs-quote" lang={p.testimonial.lang}>
+              <p>“{p.testimonial.quote}”</p>
+              <footer>{p.testimonial.name}<span>{p.testimonial.role} · {p.client}</span></footer>
+            </blockquote>
+          )}
+        </article>
+        <aside class="lp-aside">
+          <div class="cs-facts cut">
+            <p class="lp-aside-h">{pt.facts}</p>
+            <dl>{facts.map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
+            <p class="cs-services-h">{pt.services}</p>
+            <ul>{p.services.filter((s) => COPY[lang][s]).map((s) => <li><a href={`${base}${landingHref(lang, s)}`}>{COPY[lang][s].name}</a></li>)}</ul>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    {p.gallery.length > 0 && (
+      <section class="cs-gallery" aria-labelledby="cs-gal">
+        <div class="wrap">
+          <h2 id="cs-gal">{pt.gallery}</h2>
+          <ul>
+            {p.gallery.map((id) => { const w = photo(id); return <li class="cut"><img src={`${base}/img/work/${id}-l.webp`} width={w.w} height={w.h} alt={`${c.work.stand}: ${p.client}`} loading="lazy" decoding="async" /></li>; })}
+          </ul>
+        </div>
+      </section>
+    )}
+
+    {others.length > 0 && (
+      <section class="lp-related" aria-labelledby="cs-more">
+        <div class="wrap">
+          <h2 id="cs-more">{pt.more}</h2>
+          <ul class="lp-cards">
+            {others.map((q) => <li><a class="lp-card cut" href={`${base}${langPath(lang)}work/${q.slug}/`}><strong>{q[lang].title}</strong><span>{q.client} · {q.event[lang]}</span></a></li>)}
+          </ul>
+        </div>
+      </section>
+    )}
+
+    <section class="lp-cta" aria-labelledby="cta-title">
+      <div class="wrap lp-cta-row">
+        <div>
+          <h2 id="cta-title">{pt.cta}</h2>
+          <p>{u.ctaLead}</p>
+        </div>
+        <div class="cta-row">
+          <a class="btn btn-amber" href={`${home}#contact`}>{u.quote}</a>
+          <a class="btn lp-btn-light" href={`${home}#planner`}>{u.navPlanner}</a>
+          <a class="btn lp-btn-light" href={CONTACT.whatsapp} rel="noopener" target="_blank">{u.whatsapp}</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap"><FootLinks lang={lang} /></div>
+    <div class="wrap foot-row">
+      <Logo tone="light" />
+      <p>{c.footer.tag}</p>
+      <p><bdi dir="ltr">{CONTACT.email}</bdi> &nbsp;|&nbsp; <bdi dir="ltr">{CONTACT.phone}</bdi></p>
+      <a class="foot-link" href={`${home}privacy/`}>{x[lang].privacy.link}</a>
+      <p class="rights">© {new Date().getFullYear()} {c.footer.rights}</p>
+    </div>
+  </footer>
+
+  <Chat lang={lang} />
+</Base>
+
+<style is:global>
+  .cs-draft { background: var(--amber); color: var(--navy); text-align: center; font-weight: 700; padding: .5rem 1rem; }
+  .cs-facts { background: var(--navy); color: #fff; padding: 1.6rem; --cut: 22px; display: grid; gap: .8rem; }
+  .cs-facts dl { margin: 0; border-top: 1px solid rgba(255,255,255,.18); }
+  .cs-facts dl div { display: flex; justify-content: space-between; gap: 1rem; padding: .6rem 0; border-bottom: 1px solid rgba(255,255,255,.18); font-size: .94rem; }
+  .cs-facts dt { color: #B9CBE0; }
+  .cs-facts dd { margin: 0; font-weight: 600; text-align: end; }
+  .cs-services-h { color: #B9CBE0; font-size: .9rem; margin-top: .4rem; }
+  .cs-facts ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .35rem; }
+  .cs-facts ul a { color: var(--amber); font-weight: 600; }
+  .cs-quote { margin: 2.6rem 0 0; padding: 1.6rem 1.8rem; background: var(--mist); border-inline-start: 4px solid var(--amber); }
+  .cs-quote p { margin: 0; font-size: 1.15rem; line-height: 1.8; color: var(--navy); }
+  .cs-quote footer { margin-top: 1rem; font-weight: 700; display: grid; }
+  .cs-quote footer span { font-weight: 400; color: var(--ink-2); font-size: .92rem; }
+  .cs-gallery { background: var(--white); padding-block: 0 clamp(3.5rem, 7vw, 5rem); }
+  .cs-gallery h2 { font-size: clamp(1.4rem, 2.6vw, 1.9rem); }
+  .cs-gallery ul { list-style: none; margin: 1.5rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); gap: 14px; }
+  .cs-gallery li { --cut: 18px; background: var(--mist); }
+  .cs-gallery img { width: 100%; height: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+</style>

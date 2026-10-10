@@ -97,9 +97,10 @@ const c = t[lang];
     busy = true; chips.hidden = true;
     add('me', text);
     input.value = ''; input.style.height = '';
+    if (!send.started) { send.started = true; window.oxTrack?.('chat_start'); }
     const wait = add('bot typing', chatText.typing);
     try {
-      const r = await fetch(N8N.chat, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sid, message: text, lang, page: location.pathname }) });
+      const r = await fetch(N8N.chat, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sid, message: text, lang, page: location.pathname, source: window.oxSource?.() }) });
       const j = await r.json();
       wait.remove();
       add('bot', fmt(j.reply || chatText.error), true);

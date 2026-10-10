@@ -1,0 +1,10 @@
+---
+// English case-study pages. Published projects only (drafts too in `npm run dev`).
+import ProjectPage from '../../../components/ProjectPage.astro';
+import { visibleProjects } from '../../../i18n/projects';
+
+export function getStaticPaths() {
+  return visibleProjects(import.meta.env.DEV).map((p) => ({ params: { slug: p.slug } }));
+}
+---
+<ProjectPage lang="en" slug={Astro.params.slug!} />
