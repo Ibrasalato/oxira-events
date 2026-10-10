@@ -14,7 +14,7 @@
   --white: #FFFFFF;
   --cut: 22px;
   --wrap: 1200px;
-  --font: 'IBM Plex Sans', 'Cairo', system-ui, -apple-system, 'Segoe UI', Tahoma, sans-serif;
+  --font: 'IBM Plex Sans', 'Tajawal', system-ui, -apple-system, 'Segoe UI', Tahoma, sans-serif;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
